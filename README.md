@@ -31,30 +31,13 @@ Bashpip install flask
 4. Run the application
 Bashpython3 app.py
 5. Open in browser
-texthttp://127.0.0.1:5000
+text http://127.0.0.1:5000
 
 👤 Default Accounts
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-UsernamePasswordRoleadminadmin123Adminuser1password123User
+Username Password    Role 
+admin    admin123      Admin
+user1   password123 User
 
 📌 Notes
 
