@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>Search</title>
+<style>
+body{font-family:Segoe UI;background:linear-gradient(135deg,#1e3a8a,#3b82f6);margin:0;height:100vh;display:flex;align-items:center;justify-content:center;}
+.box{background:white;padding:40px;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.3);width:100%;max-width:600px;text-align:center;}
+input{width:70%;padding:14px;border-radius:10px;border:1px solid #ddd;}
+button{padding:14px 25px;background:#3b82f6;color:white;border:none;border-radius:10px;}
+pre{background:#f1f5f9;padding:20px;border-radius:12px;text-align:left;margin:20px 0;}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🔍 Search Transactions</h1>
+<form method="GET" action="/search">
+<input type="text" name="q" value="{{ query }}" placeholder="Search...">
+<button type="submit">Search</button>
+</form>
+<h3>Result:</h3>
+<pre>{{ result }}</pre>
+<a href="/dashboard">← Back</a>
+</div>
+</body>
+</html>

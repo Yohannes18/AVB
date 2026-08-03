@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Upload</title>
+<style>
+body{font-family:Segoe UI;background:linear-gradient(135deg,#1e3a8a,#3b82f6);margin:0;height:100vh;display:flex;align-items:center;justify-content:center;}
+.box{background:white;padding:40px;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.3);width:100%;max-width:500px;text-align:center;}
+button{padding:14px 30px;background:#3b82f6;color:white;border:none;border-radius:10px;}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>📁 File Upload</h1>
+<form method="POST" enctype="multipart/form-data">
+<input type="file" name="file"><br><br>
+<button type="submit">Upload File</button>
+</form>
+<br>
+<a href="/dashboard">← Back</a>
+</div>
+</body>
+</html>
