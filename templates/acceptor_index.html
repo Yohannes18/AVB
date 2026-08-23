@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF Flag Acceptor Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .glow-blob {
+            position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0; pointer-events: none;
+        }
+        .glow-blob.cyan { width: 450px; height: 450px; background: rgba(56, 189, 248, 0.12); top: -80px; left: -80px; }
+        .glow-blob.green{ width: 380px; height: 380px; background: rgba(74, 222, 128, 0.10); bottom: -60px; right: -60px; }
+
+        .card {
+            position: relative; z-index: 1;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .icon { font-size: 42px; margin-bottom: 8px; display: inline-block; }
+        h1 { margin: 0 0 8px 0; font-size: 26px; color: #38bdf8; font-weight: 800; letter-spacing: -0.5px; }
+        p.subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+        
+        .flash {
+            padding: 12px; border-radius: 10px; font-size: 14px; margin-bottom: 18px; font-weight: 500;
+        }
+        .flash.error { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+        .flash.success { background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+        .flash.info { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+        /* Generated ID Success Banner */
+        .id-success-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.08));
+            border: 2px dashed #22c55e;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 22px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            user-select: none;
+        }
+        .id-success-card:hover, .id-success-card:active {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(16, 185, 129, 0.15));
+            transform: scale(1.02);
+            border-color: #4ade80;
+        }
+        .id-title { font-size: 12px; color: #86efac; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .id-display-box {
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px 0;
+        }
+        .id-code {
+            font-family: monospace; font-size: 24px; font-weight: 800; color: #ffffff;
+            letter-spacing: 2px; background: rgba(0,0,0,0.3); padding: 4px 14px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .copy-chip {
+            background: #22c55e; color: #052e16; font-size: 12px; font-weight: 700;
+            padding: 4px 10px; border-radius: 20px; text-transform: uppercase;
+        }
+        .touch-hint { font-size: 12px; color: #4ade80; font-weight: 500; margin-top: 4px; }
+        
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #22c55e; color: #052e16; font-size: 14px; font-weight: 700;
+            padding: 10px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: none; z-index: 100; animation: popIn 0.3s ease;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: translate(-50%, -10px); }
+            to   { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        input {
+            width: 100%; padding: 14px 16px; margin: 8px 0 16px 0; border-radius: 10px;
+            border: 1px solid #334155; background: #0f172a; color: white;
+            font-size: 15px; font-family: 'Inter', monospace; box-sizing: border-box;
+            outline: none; transition: all 0.2s;
+        }
+        input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
+        
+        button {
+            width: 100%; padding: 14px; font-size: 15px; font-weight: 700;
+            border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-login { background: #38bdf8; color: #0f172a; }
+        .btn-login:hover { background: #0ea5e9; transform: translateY(-1px); }
+        
+        .btn-register {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #ffffff; margin-top: 14px;
+        }
+        .btn-register:hover { opacity: 0.95; transform: translateY(-1px); }
+
+        hr { border: none; border-top: 1px solid #334155; margin: 24px 0; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="glow-blob cyan"></div>
+    <div class="glow-blob green"></div>
+
+    <div id="toast" class="toast">✓ Session ID Copied to Clipboard!</div>
+
+    <div class="card">
+        <div class="icon">🚩</div>
+        <h1>Flag Acceptor</h1>
+        
+        {% if step == 'step2' %}
+            <p class="subtitle">First time here — set a password to generate your persistent Session ID.</p>
+        {% elif step == 'logged_in' or new_id %}
+            <p class="subtitle">Your persistent Session ID is active and bound to your account.</p>
+        {% else %}
+            <p class="subtitle">Enter your Email or Student ID and password to sign in or create your session.</p>
+        {% endif %}
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if step == 'logged_in' or new_id %}
+        <!-- Active Session / Success State -->
+        <div class="id-success-card" id="id-card" onclick="copyInternId('{{ new_id }}')">
+            <div class="id-title">Session ID Ready!</div>
+            <div class="id-display-box">
+                <span class="id-code" id="generated-id-text">{{ new_id }}</span>
+                <span class="copy-chip">Copy 📋</span>
+            </div>
+            <div class="touch-hint" id="hint-text">👆 Touch or Click ID to Copy Instantly</div>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <a href="/dashboard" class="btn-login" style="display:block; text-decoration:none; text-align:center; padding:14px; border-radius:10px; font-weight:700; background:#38bdf8; color:#0f172a;">
+                Go to Flag Acceptor Dashboard →
+            </a>
+        </div>
+        
+        <div style="margin-top: 18px; text-align:center;">
+            <a href="/logout" style="color:#94a3b8; font-size:13px; text-decoration:none;">Sign Out / Switch Account</a>
+        </div>
+
+        {% elif step == 'step2' %}
+        <!-- STEP 2: Create Account & Set Password Form -->
+        <form method="POST" style="text-align: left;">
+            <input type="hidden" name="action" value="create">
+            
+            <label style="font-size:11px; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Email / Student ID</label>
+            <input type="text" name="identifier" value="{{ identifier }}" readonly style="opacity: 0.85; cursor: not-allowed; background: #0f172a; border-color: #38bdf8;">
+            
+            <label style="font-size:11px; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Set Password</label>
+            <input type="password" name="password" placeholder="Enter password (min 4 characters)" required value="{{ initial_password or '' }}" autofocus>
+            
+            <label style="font-size:11px; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Confirm Password</label>
+            <input type="password" name="confirm_password" placeholder="Re-enter password to confirm" required>
+            
+            <button type="submit" class="btn-register" id="create-btn">
+                ⚡ Create Account & Generate Session ID
+            </button>
+        </form>
+        
+        <div style="margin-top: 18px; text-align: center;">
+            <a href="/" style="color:#94a3b8; font-size:13px; text-decoration:none;">← Back to Sign In</a>
+        </div>
+
+        {% else %}
+        <!-- STEP 1: Sign In / Check Form (Default) -->
+        <form method="POST" style="text-align: left;">
+            <input type="hidden" name="action" value="check">
+            <label style="font-size:11px; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Email / Student ID</label>
+            <input type="text" name="identifier" placeholder="e.g. intern@university.edu or STU-1002" required autocomplete="off" value="{{ identifier or '' }}" autofocus>
+            
+            <label style="font-size:11px; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+            
+            <button type="submit" class="btn-register" style="background: linear-gradient(135deg, #38bdf8, #0284c7); color: #0f172a; margin-top: 14px;">
+                Continue →
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <script>
+        // Instant Copy Functionality
+        function copyInternId(idText) {
+            navigator.clipboard.writeText(idText).then(function() {
+                showToast("✓ Copied " + idText + " to Clipboard!");
+                const hint = document.getElementById('hint-text');
+                if(hint) hint.innerText = "✓ Copied! Paste into the vulnerable bank app (/setup).";
+            }).catch(function(err) {
+                // Fallback for non-HTTPS or legacy browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = idText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+                showToast("✓ Copied " + idText + " to Clipboard!");
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2800);
+        }
+
+        // Auto copy on page load if ID was newly generated
+        {% if new_id %}
+        window.addEventListener('DOMContentLoaded', () => {
+            copyInternId('{{ new_id }}');
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
