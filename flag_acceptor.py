@@ -297,6 +297,13 @@ def dashboard():
                            progress=progress, 
                            total_vulns=total_vulns)
 
+@app.route('/leaderboard')
+def public_leaderboard():
+    if session.get('admin'):
+        return redirect(url_for('admin_leaderboard'))
+    flash("The leaderboard is restricted to administrators.", "warning")
+    return redirect(url_for('dashboard'))
+
 @app.route('/admin/leaderboard')
 @admin_required
 def admin_leaderboard():
