@@ -148,7 +148,7 @@ def inject_student_id():
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup_intern():
-    """Allow interns to inject their dynamic ID from the Flag Acceptor into the bank (Permanent locking)."""
+    """Allow interns to inject their dynamic ID from the Flag Acceptor into the bank (Locked once set)."""
     current_id = session.get('intern_id')
     if not current_id and session.get('user_id'):
         try:
@@ -165,16 +165,12 @@ def setup_intern():
     if not current_id:
         current_id = os.environ.get('STUDENT_ID', 'DEFAULT')
 
-    # LOCKDOWN GUARD: If ID is already configured (not DEFAULT), reject any changes!
+    # IMMUTABLE HARD GUARD: If ID is already configured (not DEFAULT), block access completely & redirect!
     if current_id and current_id != 'DEFAULT':
-        if request.method == 'POST':
-            flash(f"Registration ID is locked to {current_id}. Re-configuration is disabled for the competition.", "error")
-            if session.get('user_id'):
-                return redirect('/profile')
-            return redirect(url_for('login'))
-        
-        flash(f"Your Registration ID is locked to {current_id} for the competition.", "info")
-        return render_template('setup.html', is_locked=True)
+        flash(f"Your Registration ID is permanently locked to {current_id} for the competition.", "info")
+        if session.get('user_id'):
+            return redirect('/profile')
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
         new_intern_id = request.form.get('intern_id', '').strip().upper()
@@ -196,7 +192,7 @@ def setup_intern():
                 return redirect('/profile')
             return redirect(url_for('login'))
 
-    return render_template('setup.html', is_locked=False)
+    return render_template('setup.html')
 
 # Create flag files for file-read vulns (LFI / XXE / SSRF)
 def _write_flag_files():
