@@ -124,9 +124,14 @@
 
         <form action="/setup" method="POST">
             <label for="intern_id">Registration / Intern ID</label>
-            <input type="text" id="intern_id" name="intern_id" placeholder="e.g. INT-A1B2C" value="{{ STUDENT_ID if STUDENT_ID != 'DEFAULT' else '' }}" required autocomplete="off">
-
-            <button type="submit" class="btn-primary">Save Configuration & Proceed</button>
+            {% if is_locked %}
+                <input type="text" id="intern_id" name="intern_id" value="{{ STUDENT_ID }}" readonly style="opacity: 0.75; cursor: not-allowed; border-color: rgba(56,189,248,0.4); background: rgba(0,0,0,0.3);">
+                <p style="color:#f87171; font-size:12px; margin-top:-16px; margin-bottom:20px; font-weight:500;">🔒 ID is locked for the duration of the competition.</p>
+                <button type="button" class="btn-primary" disabled style="opacity: 0.6; cursor: not-allowed; background: linear-gradient(135deg, #475569, #334155);">🔒 ID Locked (Re-configuration Disabled)</button>
+            {% else %}
+                <input type="text" id="intern_id" name="intern_id" placeholder="e.g. INT-A1B2C" value="{{ STUDENT_ID if STUDENT_ID != 'DEFAULT' else '' }}" required autocomplete="off">
+                <button type="submit" class="btn-primary">Save Configuration & Proceed</button>
+            {% endif %}
         </form>
 
         <div class="links">
