@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="session-ref" content="{{ STUDENT_ID }}">
+    <title>Web Synchronization – SecureBank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:#0a0f1e;color:#e2e8f0;min-height:100vh;}
+        .navbar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(20px);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+        .nav-brand{display:flex;align-items:center;gap:12px;}
+        .nav-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#0284c7);display:flex;align-items:center;justify-content:center;font-size:18px;}
+        .nav-title{font-size:18px;font-weight:700;color:#fff;}
+        .nav-links a{color:#94a3b8;text-decoration:none;margin-left:20px;font-size:14px;font-weight:500;transition:color .2s;}
+        .nav-links a:hover{color:#fff;}
+        .nav-user{display:flex;align-items:center;gap:10px;margin-left:20px;}
+        .avatar-link{text-decoration:none;display:flex;align-items:center;}
+        .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#0284c7);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;transition:all .2s;border:2px solid transparent;}
+        .avatar-link:hover .avatar{border-color:rgba(14,165,233,0.6);box-shadow:0 0 12px rgba(14,165,233,0.4);transform:scale(1.05);}
+        .container{max-width:860px;margin:0 auto;padding:40px 24px;}
+        h1{font-size:28px;font-weight:700;margin-bottom:6px;}
+        .subtitle{color:#64748b;font-size:14px;margin-bottom:28px;}
+        .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:26px;margin-bottom:22px;}
+        .card-title{font-size:15px;font-weight:600;color:#f1f5f9;margin-bottom:16px;}
+        label{display:block;color:#94a3b8;font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+        input{width:100%;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#f1f5f9;font-size:14px;margin-bottom:14px;outline:none;font-family:'Inter',sans-serif;}
+        .btn{padding:11px 22px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Inter',sans-serif;}
+        .result-box{background:#0f172a;border-radius:12px;padding:16px;margin-top:14px;max-height:350px;overflow-y:auto;}
+        .result-box pre{font-family:'Fira Code',monospace;font-size:11px;color:#7dd3fc;white-space:pre-wrap;word-break:break-all;}
+    </style>
+</head>
+<body data-session-ref="{{ STUDENT_ID }}">
+<nav class="navbar">
+    <div class="nav-brand"><div class="nav-icon">🌐</div><div class="nav-title">SecureBank Portal</div></div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/upload">Documents</a>
+        <a href="/search">Directory</a>
+        <a href="/fetch">Connect External Account</a>
+        <a href="/fetch-url">Partner Data Sync</a>
+        <a href="/render-template">Account Statements</a>
+        <a href="/crypto">Security Center</a>
+        <a href="/advanced-import">Account Migration</a>
+        <a href="/secure-transfer">Express Transfer</a>
+        <a href="/backup">Data Archival</a>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="nav-user">
+        <a href="/profile" class="avatar-link" title="User Profile">
+            <div class="avatar">{{ user['username'][0].upper() if user else 'U' }}</div>
+        </a>
+    </div>
+</nav>
+<div class="container">
+    <h1>🌐 External Web Synchronization</h1>
+    <p class="subtitle">Fetch partner financial feeds and webhook synchronizations.</p>
+
+    <div class="card">
+        <div class="card-title">Endpoint Fetcher</div>
+        <form method="POST" action="/fetch-url" id="ssrf-adv-form">
+            <label>Target Endpoint URL</label>
+            <input type="text" name="url" id="ssrf-url" placeholder="https://api.partnerbank.com/sync" value="{{ url or '' }}">
+            <button type="submit" class="btn">Execute Sync</button>
+        </form>
+        {% if result %}
+        <div class="result-box"><pre>{{ result | tojson(indent=2) }}</pre></div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
