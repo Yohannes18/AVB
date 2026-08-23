@@ -19,9 +19,9 @@ def test_intern_id_flow():
     print(f"Profile GET status: {r_profile.status_code}")
     assert r_profile.status_code == 200, "Failed to load /profile"
     
-    assert "✓ CONFIGURED" in r_profile.text, "Configured badge missing from /profile"
+    assert "LOCKED & BOUND" in r_profile.text, "LOCKED & BOUND badge missing from /profile"
     assert "INT-TEST99" in r_profile.text, "Configured Intern ID INT-TEST99 missing from /profile"
-    print("Profile page correctly displays configured Intern ID INT-TEST99!")
+    print("Profile page correctly displays LOCKED & BOUND Intern ID INT-TEST99!")
 
     # 4. Check DB persistence for user admin
     conn = sqlite3.connect('bank.db')
@@ -33,13 +33,18 @@ def test_intern_id_flow():
     print(f"Database stored intern_id for admin: {row[0] if row else None}")
     assert row and row[0] == 'INT-TEST99', "Intern ID was not persisted in bank.db users table"
     
-    # 5. Check revisiting /setup when already configured
+    # 5. Check GET /setup when already configured (should be read-only / locked)
     r_setup_revisit = s.get(f"{BASE_URL}/setup")
     assert r_setup_revisit.status_code == 200, "Failed GET /setup"
-    assert "Session is already configured with Registration ID: INT-TEST99" in r_setup_revisit.text, "Reconfiguration warning banner missing from GET /setup"
-    print("Re-visiting /setup correctly notifies user: 'Session is already configured with Registration ID: INT-TEST99'")
+    assert "Your Registration ID is locked to INT-TEST99" in r_setup_revisit.text, "Lock notice missing from GET /setup"
+    print("Re-visiting GET /setup correctly shows lock banner: 'Your Registration ID is locked to INT-TEST99'")
 
-    print("\n---> ALL INTERN ID BINDING & RECONFIGURATION NOTIFICATION TESTS PASSED!")
+    # 6. Attempt POST /setup with a different ID (should be rejected and locked)
+    r_reconfig = s.post(f"{BASE_URL}/setup", data={'intern_id': 'INT-NEWID123'}, allow_redirects=True)
+    assert "Registration ID is locked to INT-TEST99" in r_reconfig.text, "POST reconfiguration was not blocked"
+    print("POST /setup reconfiguration attempt was successfully BLOCKED and rejected!")
+
+    print("\n---> ALL PERMANENT INTERN ID LOCKING & PROTECTION TESTS PASSED!")
 
 if __name__ == '__main__':
     test_intern_id_flow()
