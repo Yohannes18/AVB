@@ -33,7 +33,13 @@ def test_intern_id_flow():
     print(f"Database stored intern_id for admin: {row[0] if row else None}")
     assert row and row[0] == 'INT-TEST99', "Intern ID was not persisted in bank.db users table"
     
-    print("\n---> ALL INTERN ID BINDING & PROFILE DISPLAY TESTS PASSED!")
+    # 5. Check revisiting /setup when already configured
+    r_setup_revisit = s.get(f"{BASE_URL}/setup")
+    assert r_setup_revisit.status_code == 200, "Failed GET /setup"
+    assert "Session is already configured with Registration ID: INT-TEST99" in r_setup_revisit.text, "Reconfiguration warning banner missing from GET /setup"
+    print("Re-visiting /setup correctly notifies user: 'Session is already configured with Registration ID: INT-TEST99'")
+
+    print("\n---> ALL INTERN ID BINDING & RECONFIGURATION NOTIFICATION TESTS PASSED!")
 
 if __name__ == '__main__':
     test_intern_id_flow()
