@@ -54,6 +54,98 @@ CTF_FLAGS = {
     'oauth_redirect':    'FLAG{0Auth_0p3n_R3d1r3ct_JWT_L34k}',
 }
 
+FLAG_CATEGORIES = [
+    {
+        'id': 'sqli',
+        'title': '💉 SQL Injection (SQLi)',
+        'icon': '💉',
+        'description': 'Exploit database query flaws across authentication, registration, search, balance manipulation, profile updates, and API endpoints.',
+        'flags': [
+            {'key': 'sqli_login', 'title': 'SQLi #1: Auth Bypass on Login Form', 'hint': 'Bypass the authentication check on the login form without knowing the password.'},
+            {'key': 'sqli_register', 'title': 'SQLi #2: User Registration Insert Injection', 'hint': 'Inject malicious SQL statements into user registration fields.'},
+            {'key': 'sqli_search', 'title': 'SQLi #3: UNION Search Query Data Extraction', 'hint': 'Use UNION SELECT payloads in search inputs to extract hidden database rows.'},
+            {'key': 'sqli_transfer', 'title': 'SQLi #4: Transfer Balance Manipulation', 'hint': 'Manipulate SQL queries during fund transfers to alter account balances.'},
+            {'key': 'sqli_profile', 'title': 'SQLi #5: Profile Update Parameter Injection', 'hint': 'Exploit unsanitized inputs inside profile update endpoints.'},
+            {'key': 'sqli_api', 'title': 'SQLi #6: API Endpoint Database Dump', 'hint': 'Extract full database tables through vulnerable REST API parameters.'},
+            {'key': 'blind_sqli', 'title': 'SQLi #7: Blind Time-Based & Stacked Queries', 'hint': 'Infer sensitive data or trigger stacked queries using time delays.'},
+        ]
+    },
+    {
+        'id': 'rce',
+        'title': '⚡ Code Execution, SSTI & Deserialization',
+        'icon': '⚡',
+        'description': 'Gain remote code execution (RCE) via OS command injection, Python code execution, template injection, and insecure object deserialization.',
+        'flags': [
+            {'key': 'cmd_injection', 'title': 'RCE #1: Backup System OS Command Injection', 'hint': 'Inject arbitrary shell commands into system backup processes.'},
+            {'key': 'rce_eval', 'title': 'RCE #2: Python eval() Dynamic Code Execution', 'hint': 'Execute arbitrary Python code using insecure eval() input handling.'},
+            {'key': 'ssti', 'title': 'RCE #3: Jinja2 Server-Side Template Injection', 'hint': 'Exploit Jinja2 template rendering to read environment variables and execute code.'},
+            {'key': 'pickle_rce', 'title': 'RCE #4: Python Pickle Deserialization RCE', 'hint': 'Craft malicious Python pickle payloads to trigger arbitrary system execution.'},
+            {'key': 'yaml_rce', 'title': 'RCE #5: Unsafe PyYAML Deserialization RCE', 'hint': 'Leverage unsafe PyYAML load functions to execute code on import.'},
+            {'key': 'deser_chain', 'title': 'RCE #6: Advanced Deserialization Gadget Chain', 'hint': 'Chain multiple deserialization flaws (Pickle/Zip/YAML) for full server takeover.'},
+        ]
+    },
+    {
+        'id': 'auth',
+        'title': '🔐 Auth, Session, XSS & Access Control',
+        'icon': '🔐',
+        'description': 'Bypass authorization barriers, exploit IDOR, manipulate sessions, perform stored XSS, and expose internal secrets.',
+        'flags': [
+            {'key': 'hardcoded_secret', 'title': 'Auth #1: Hardcoded Secret Key Exposure', 'hint': 'Locate static secret keys exposed in source code or client bundles.'},
+            {'key': 'xss_stored', 'title': 'Auth #2: Stored Cross-Site Scripting (XSS)', 'hint': 'Inject persistent HTML/JavaScript payloads in public comment sections.'},
+            {'key': 'idor', 'title': 'Auth #3: Insecure Direct Object Reference (IDOR)', 'hint': 'Access unauthorized private user records by altering object IDs.'},
+            {'key': 'session_fixation', 'title': 'Auth #4: Session Fixation Attack', 'hint': 'Force a victim account to reuse an attacker-controlled session ID.'},
+            {'key': 'reset_bypass', 'title': 'Auth #5: Password Reset Logic & Magic Token Bypass', 'hint': 'Exploit flaws in token generation or verification to reset arbitrary passwords.'},
+            {'key': 'header_bypass', 'title': 'Auth #6: HTTP Custom Header Role Bypass (X-Admin-Role)', 'hint': 'Gain administrative access by injecting custom HTTP role headers.'},
+            {'key': 'mass_export', 'title': 'Auth #7: Unauthenticated Mass Data Export', 'hint': 'Download complete database exports from unprotected API endpoints.'},
+            {'key': 'debug_endpoint', 'title': 'Auth #8: Environment Secret Disclosure via Debug Endpoint', 'hint': 'Inspect leftover developer debug endpoints exposing environment variables.'},
+        ]
+    },
+    {
+        'id': 'jwt',
+        'title': '🔑 JWT & OAuth Vulnerabilities',
+        'icon': '🔑',
+        'description': 'Forge JSON Web Tokens, perform algorithm switching attacks, and steal OAuth authorization tokens.',
+        'flags': [
+            {'key': 'jwt_weak', 'title': 'JWT #1: Weak HMAC Secret Key Signature Forgery', 'hint': 'Crack weak secret keys to forge valid signed JWT tokens.'},
+            {'key': 'jwt_confusion', 'title': 'JWT #2: Algorithm Confusion (RS256 -> HS256)', 'hint': 'Bypass signature verification by forcing RS256 public key verification as HS256.'},
+            {'key': 'oauth_redirect', 'title': 'OAuth #1: Open Redirect Token Leakage', 'hint': 'Intercept OAuth tokens by redirecting authentication flow to an external domain.'},
+        ]
+    },
+    {
+        'id': 'files',
+        'title': '📁 File System & File Upload Vulnerabilities',
+        'icon': '📁',
+        'description': 'Read arbitrary system files, bypass file upload restrictions, and exploit path traversal vulnerabilities.',
+        'flags': [
+            {'key': 'lfi', 'title': 'File #1: Local File Inclusion (LFI)', 'hint': 'Traverse system directory trees to read confidential system files.'},
+            {'key': 'xxe', 'title': 'File #2: XML External Entity Injection (XXE)', 'hint': 'Exploit XML document parsers to read internal system files.'},
+            {'key': 'upload_webshell', 'title': 'File #3: Unrestricted File Upload Webshell', 'hint': 'Bypass file extension filters to upload executable web shells.'},
+            {'key': 'zip_slip', 'title': 'File #4: Zip Slip Path Traversal Archive Overwrite', 'hint': 'Extract zip archives containing directory traversal paths to overwrite files.'},
+        ]
+    },
+    {
+        'id': 'ssrf',
+        'title': '🌐 Server-Side Request Forgery (SSRF)',
+        'icon': '🌐',
+        'description': 'Abuse server-side network fetchers to reach internal network infrastructure.',
+        'flags': [
+            {'key': 'ssrf_basic', 'title': 'SSRF #1: Basic Internal URL Fetcher', 'hint': 'Force the web server to send requests to local internal services.'},
+            {'key': 'ssrf_advanced', 'title': 'SSRF #2: Advanced DNS Rebinding & Blocklist Bypass', 'hint': 'Bypass IP restriction blocklists using DNS rebinding or alternate representations.'},
+        ]
+    },
+    {
+        'id': 'crypto',
+        'title': '⚙️ Cryptography & Race Conditions',
+        'icon': '⚙️',
+        'description': 'Exploit race conditions, static AES initial vectors, and weak RSA prime factors.',
+        'flags': [
+            {'key': 'toctou', 'title': 'Crypto/Logic #1: TOCTOU Double-Spend Race Condition', 'hint': 'Send parallel concurrent requests to withdraw funds twice before state updates.'},
+            {'key': 'crypto_aes', 'title': 'Crypto #2: Static IV / ECB Mode AES Encryption Attack', 'hint': 'Exploit deterministic AES ECB block patterns to decrypt encrypted messages.'},
+            {'key': 'crypto_rsa', 'title': 'Crypto #3: Small RSA Prime Factorization & Missing Padding', 'hint': 'Factor small RSA modulus N to derive private keys without OAEP padding.'},
+        ]
+    }
+]
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 def generate_student_flag(key, student_id):
@@ -269,6 +361,7 @@ def dashboard():
         
         # Check against all possible flags for this intern
         found_vuln_key = None
+        found_title = None
         for key in CTF_FLAGS.keys():
             expected_flag = generate_student_flag(key, intern_id)
             if submitted_flag == expected_flag:
@@ -276,31 +369,70 @@ def dashboard():
                 break
                 
         if found_vuln_key:
+            # Resolve human readable title from FLAG_CATEGORIES
+            for cat in FLAG_CATEGORIES:
+                for f in cat['flags']:
+                    if f['key'] == found_vuln_key:
+                        found_title = f['title']
+                        break
+            if not found_title:
+                found_title = found_vuln_key
+
             try:
                 cursor.execute(
                     "INSERT INTO submissions (intern_id, vuln_key) VALUES (?, ?)", 
                     (intern_id, found_vuln_key)
                 )
                 conn.commit()
-                flash(f"🎉 Correct! You found the {found_vuln_key} flag!", "success")
+                flash(f"🎉 Correct! You solved: {found_title}!", "success")
             except sqlite3.IntegrityError:
-                flash("⚠️ You already submitted this flag!", "warning")
+                flash(f"⚠️ You already submitted the [{found_title}] flag!", "warning")
         else:
             flash("❌ Incorrect or malformed flag.", "error")
 
     # Get current progress
     cursor.execute("SELECT vuln_key, submitted_at FROM submissions WHERE intern_id = ? ORDER BY submitted_at DESC", (intern_id,))
-    submissions = cursor.fetchall()
+    submissions_raw = cursor.fetchall()
     conn.close()
     
+    solved_map = {row['vuln_key']: row['submitted_at'] for row in submissions_raw}
+    submissions = [dict(row) for row in submissions_raw]
+
+    # Build category breakdown
+    categories_data = []
+    for cat in FLAG_CATEGORIES:
+        cat_solved = 0
+        flags_list = []
+        for f in cat['flags']:
+            is_solved = f['key'] in solved_map
+            if is_solved:
+                cat_solved += 1
+            flags_list.append({
+                'key': f['key'],
+                'title': f['title'],
+                'hint': f['hint'],
+                'is_solved': is_solved,
+                'submitted_at': solved_map.get(f['key'])
+            })
+        categories_data.append({
+            'id': cat['id'],
+            'title': cat['title'],
+            'icon': cat['icon'],
+            'description': cat['description'],
+            'solved_count': cat_solved,
+            'total_count': len(cat['flags']),
+            'flags': flags_list
+        })
+    
     total_vulns = len(CTF_FLAGS)
-    progress = len(submissions)
+    progress = len(solved_map)
     
     return render_template('acceptor_dashboard.html', 
                            intern_id=intern_id, 
                            submissions=submissions, 
                            progress=progress, 
-                           total_vulns=total_vulns)
+                           total_vulns=total_vulns,
+                           categories=categories_data)
 
 @app.route('/leaderboard')
 def public_leaderboard():
