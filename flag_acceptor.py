@@ -138,8 +138,10 @@ def login_required(f):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('admin'):
+        if not session.get('admin') or session.get('intern_id'):
             flash("Admin access required.", "error")
+            if session.get('intern_id'):
+                return redirect(url_for('dashboard'))
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -161,6 +163,7 @@ def login():
             # Admin Login Check
             if identifier in ['admin', 'administrator']:
                 if password == ADMIN_PASSWORD:
+                    session.clear()
                     session['admin'] = True
                     return redirect(url_for('admin_leaderboard'))
                 else:
@@ -181,6 +184,7 @@ def login():
                 # Existing account -> Verify password
                 if check_password_hash(user['password_hash'], password):
                     existing_id = user['intern_id']
+                    session.clear()
                     session['intern_id'] = existing_id
                     flash(f"Welcome back! Your persistent Session ID is {existing_id}", "success")
                     return render_template('acceptor_index.html', step='logged_in', new_id=existing_id, identifier=identifier)
@@ -234,6 +238,7 @@ def login():
                 flash("An account with this Email/Student ID already exists. Please sign in.", "error")
                 return render_template('acceptor_index.html', step='step1', identifier=identifier)
 
+            session.clear()
             session['intern_id'] = new_id
             flash(f"Account created successfully! Your persistent Session ID is {new_id}", "success")
             return render_template('acceptor_index.html', step='logged_in', new_id=new_id, identifier=identifier)
@@ -252,7 +257,7 @@ def logout():
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    if session.get('admin'):
+    if session.get('admin') and not session.get('intern_id'):
         return redirect(url_for('admin_leaderboard'))
         
     intern_id = session['intern_id']
