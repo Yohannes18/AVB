@@ -1,0 +1,30 @@
+services:
+  # The Vulnerable Banking Application
+  vulnbank:
+    build: .
+    container_name: advanced_vulnbank
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    # Mount key directories and databases so state persists across restarts
+    volumes:
+      - ./keys:/app/keys
+      - ./flags:/app/flags
+      - ./bank.db:/app/bank.db
+      - ./backup:/app/backup
+      - ./config:/app/config
+      - ./backups:/app/backups
+      - ./app.py:/app/app.py
+
+  # The Flag Acceptor Platform
+  flag_acceptor:
+    build: .
+    container_name: flag_acceptor
+    command: python flag_acceptor.py
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    # Mount the scoreboard database and backups directory so scores persist
+    volumes:
+      - ./scoreboard.db:/app/scoreboard.db
+      - ./backups:/app/backups
