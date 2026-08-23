@@ -149,25 +149,39 @@ def inject_student_id():
 @app.route('/setup', methods=['GET', 'POST'])
 def setup_intern():
     """Allow interns to inject their dynamic ID from the Flag Acceptor into the bank."""
+    current_id = session.get('intern_id') or os.environ.get('STUDENT_ID', 'DEFAULT')
+
     if request.method == 'POST':
-        intern_id = request.form.get('intern_id', '').strip().upper()
-        if intern_id:
-            session['intern_id'] = intern_id
-            if session.get('user_id'):
-                with db_write_lock:
-                    conn = get_db()
-                    cursor = conn.cursor()
-                    try:
-                        cursor.execute("UPDATE users SET intern_id = ? WHERE id = ?", (intern_id, session['user_id']))
-                        conn.commit()
-                    except Exception:
-                        pass
-                    finally:
-                        conn.close()
-            flash(f"Instance successfully bound to {intern_id}!", "success")
+        new_intern_id = request.form.get('intern_id', '').strip().upper()
+        if new_intern_id:
+            if current_id and current_id != 'DEFAULT' and current_id == new_intern_id:
+                flash(f"Session is already configured with Registration ID: {current_id}", "info")
+            else:
+                session['intern_id'] = new_intern_id
+                if session.get('user_id'):
+                    with db_write_lock:
+                        conn = get_db()
+                        cursor = conn.cursor()
+                        try:
+                            cursor.execute("UPDATE users SET intern_id = ? WHERE id = ?", (new_intern_id, session['user_id']))
+                            conn.commit()
+                        except Exception:
+                            pass
+                        finally:
+                            conn.close()
+                if current_id and current_id != 'DEFAULT':
+                    flash(f"Configuration updated! Instance re-bound to {new_intern_id}.", "success")
+                else:
+                    flash(f"Instance successfully bound to {new_intern_id}!", "success")
+
             if session.get('user_id'):
                 return redirect('/profile')
             return redirect(url_for('login'))
+
+    # On GET request: if already configured, inform the user
+    if current_id and current_id != 'DEFAULT':
+        flash(f"Session is already configured with Registration ID: {current_id}", "info")
+
     return render_template('setup.html')
 
 # Create flag files for file-read vulns (LFI / XXE / SSRF)
