@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="session-ref" content="{{ STUDENT_ID }}">
+    <title>Express Transfer – SecureBank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:#0a0f1e;color:#e2e8f0;min-height:100vh;}
+        .navbar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(20px);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+        .nav-brand{display:flex;align-items:center;gap:12px;}
+        .nav-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;font-size:18px;}
+        .nav-title{font-size:18px;font-weight:700;color:#fff;}
+        .nav-links a{color:#94a3b8;text-decoration:none;margin-left:20px;font-size:14px;font-weight:500;transition:color .2s;}
+        .nav-links a:hover{color:#fff;}
+        .nav-user{display:flex;align-items:center;gap:10px;margin-left:20px;}
+        .avatar-link{text-decoration:none;display:flex;align-items:center;}
+        .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;transition:all .2s;border:2px solid transparent;}
+        .avatar-link:hover .avatar{border-color:rgba(20,184,166,0.6);box-shadow:0 0 12px rgba(20,184,166,0.4);transform:scale(1.05);}
+        .container{max-width:820px;margin:0 auto;padding:40px 24px;}
+        h1{font-size:28px;font-weight:700;margin-bottom:6px;}
+        .subtitle{color:#64748b;font-size:14px;margin-bottom:28px;}
+        .flash{padding:13px 18px;border-radius:12px;margin-bottom:18px;font-size:14px;font-weight:500;}
+        .flash.success{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2);}
+        .flash.error{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+        .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:26px;margin-bottom:22px;}
+        .card-title{font-size:15px;font-weight:600;color:#f1f5f9;margin-bottom:16px;}
+        label{display:block;color:#94a3b8;font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+        input{width:100%;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#f1f5f9;font-size:14px;margin-bottom:14px;outline:none;font-family:'Inter',sans-serif;}
+        .btn{padding:11px 22px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;font-family:'Inter',sans-serif;margin-right:8px;}
+        .btn-race{background:linear-gradient(135deg,#0ea5e9,#0284c7);}
+        #race-log{background:#0f172a;border-radius:12px;padding:16px;font-family:'Fira Code',monospace;font-size:12px;color:#4ade80;min-height:80px;max-height:200px;overflow-y:auto;margin-top:14px;white-space:pre-wrap;}
+    </style>
+</head>
+<body data-session-ref="{{ STUDENT_ID }}">
+<nav class="navbar">
+    <div class="nav-brand"><div class="nav-icon">⚡</div><div class="nav-title">SecureBank Portal</div></div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/upload">Documents</a>
+        <a href="/search">Directory</a>
+        <a href="/fetch">Connect External Account</a>
+        <a href="/fetch-url">Partner Data Sync</a>
+        <a href="/render-template">Account Statements</a>
+        <a href="/crypto">Security Center</a>
+        <a href="/advanced-import">Account Migration</a>
+        <a href="/secure-transfer">Express Transfer</a>
+        <a href="/backup">Data Archival</a>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="nav-user">
+        <a href="/profile" class="avatar-link" title="User Profile">
+            <div class="avatar">{{ user['username'][0].upper() if user else 'U' }}</div>
+        </a>
+    </div>
+</nav>
+<div class="container">
+    <h1>⚡ Express Money Transfer</h1>
+    <p class="subtitle">High-speed account-to-account transfer processing.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-title">Transfer Execution</div>
+        <form method="POST" action="/secure-transfer" id="toctou-form">
+            <label>From Account</label>
+            <input type="text" name="from_account" id="from-acct" placeholder="your username">
+            <label>To Account</label>
+            <input type="text" name="to_account" placeholder="recipient username">
+            <label>Amount ($)</label>
+            <input type="number" name="amount" step="0.01" placeholder="100.00">
+            <button type="submit" class="btn">Execute Transfer</button>
+            <button type="button" class="btn btn-race" onclick="raceAttack()">⚡ Parallel Batch Execution</button>
+        </form>
+        <div id="race-log"></div>
+    </div>
+</div>
+<script>
+async function raceAttack() {
+    const form = document.getElementById('toctou-form');
+    const fd = new FormData(form);
+    const log = document.getElementById('race-log');
+    log.textContent = '[*] Launching 10 concurrent requests...\n';
+    const reqs = Array.from({length:10}, (_,i) =>
+        fetch('/secure-transfer', {method:'POST', body: new URLSearchParams(fd), credentials:'same-origin'})
+        .then(r => { log.textContent += `[${i+1}] HTTP ${r.status}\n`; })
+        .catch(e => { log.textContent += `[${i+1}] Error: ${e}\n`; })
+    );
+    await Promise.all(reqs);
+    log.textContent += '[✓] Execution complete — check balance.\n';
+}
+</script>
+</body>
+</html>
