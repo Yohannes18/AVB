@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.log
+backups/
+backup/bank_backup.db
+config/app_config.db
+flags/
+keys/
+cookies.txt
+test_cookie.txt
+=42.0.0
+.cursor/
