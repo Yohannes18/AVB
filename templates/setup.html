@@ -112,7 +112,7 @@
 
         <form action="/setup" method="POST">
             <label for="intern_id">Registration / Intern ID</label>
-            <input type="text" id="intern_id" name="intern_id" placeholder="e.g. INT-A1B2C" value="{{ STUDENT_ID }}" required autocomplete="off">
+            <input type="text" id="intern_id" name="intern_id" placeholder="e.g. INT-A1B2C" value="{{ STUDENT_ID if STUDENT_ID != 'DEFAULT' else '' }}" required autocomplete="off">
 
             <button type="submit" class="btn-primary">Save Configuration & Proceed</button>
         </form>
