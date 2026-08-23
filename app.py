@@ -96,9 +96,22 @@ def get_flag(key):
     
     # Prioritize session ID (if registered dynamically), fallback to ENV
     student_id = 'DEFAULT'
-    if has_request_context() and session.get('intern_id'):
-        student_id = session.get('intern_id')
-    else:
+    if has_request_context():
+        if session.get('intern_id'):
+            student_id = session.get('intern_id')
+        elif session.get('user_id'):
+            try:
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute("SELECT intern_id FROM users WHERE id = ?", (session['user_id'],))
+                row = cursor.fetchone()
+                if row and row['intern_id']:
+                    student_id = row['intern_id']
+                    session['intern_id'] = student_id
+                conn.close()
+            except Exception:
+                pass
+    if student_id == 'DEFAULT':
         student_id = os.environ.get('STUDENT_ID', 'DEFAULT')
     
     # Generate an 8-character suffix unique to this student and this vulnerability
@@ -113,7 +126,24 @@ def get_flag(key):
 @app.context_processor
 def inject_student_id():
     """Inject STUDENT_ID into all templates for UI watermarking."""
-    student_id = session.get('intern_id') if (has_request_context() and session.get('intern_id')) else os.environ.get('STUDENT_ID', 'DEFAULT')
+    student_id = 'DEFAULT'
+    if has_request_context():
+        if session.get('intern_id'):
+            student_id = session.get('intern_id')
+        elif session.get('user_id'):
+            try:
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute("SELECT intern_id FROM users WHERE id = ?", (session['user_id'],))
+                row = cursor.fetchone()
+                if row and row['intern_id']:
+                    student_id = row['intern_id']
+                    session['intern_id'] = student_id
+                conn.close()
+            except Exception:
+                pass
+    if student_id == 'DEFAULT':
+        student_id = os.environ.get('STUDENT_ID', 'DEFAULT')
     return dict(STUDENT_ID=student_id)
 
 @app.route('/setup', methods=['GET', 'POST'])
@@ -123,7 +153,20 @@ def setup_intern():
         intern_id = request.form.get('intern_id', '').strip().upper()
         if intern_id:
             session['intern_id'] = intern_id
-            flash(f"Instance bound to {intern_id}!", "success")
+            if session.get('user_id'):
+                with db_write_lock:
+                    conn = get_db()
+                    cursor = conn.cursor()
+                    try:
+                        cursor.execute("UPDATE users SET intern_id = ? WHERE id = ?", (intern_id, session['user_id']))
+                        conn.commit()
+                    except Exception:
+                        pass
+                    finally:
+                        conn.close()
+            flash(f"Instance successfully bound to {intern_id}!", "success")
+            if session.get('user_id'):
+                return redirect('/profile')
             return redirect(url_for('login'))
     return render_template('setup.html')
 
@@ -189,9 +232,14 @@ def init_db():
             is_admin INTEGER DEFAULT 0,
             last_login TEXT,
             session_token TEXT,
+            intern_id TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN intern_id TEXT;")
+    except Exception:
+        pass
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS comments (
@@ -509,6 +557,27 @@ def login():
             session['role']     = user['role']
             # VULNERABILITY 20: Session fixation (token generated but old session reused)
             session['session_token'] = secrets.token_hex(16)
+
+            # Persist or populate intern_id across logins
+            try:
+                db_intern_id = user['intern_id'] if 'intern_id' in user.keys() else None
+            except Exception:
+                db_intern_id = None
+
+            if db_intern_id:
+                session['intern_id'] = db_intern_id
+            elif session.get('intern_id'):
+                with db_write_lock:
+                    conn = get_db()
+                    cursor = conn.cursor()
+                    try:
+                        cursor.execute("UPDATE users SET intern_id = ? WHERE id = ?", (session['intern_id'], user['id']))
+                        conn.commit()
+                    except Exception:
+                        pass
+                    finally:
+                        conn.close()
+
             return redirect('/dashboard')
 
     sqli_indicators = ["'", '--', 'OR ', 'UNION', '/*']
