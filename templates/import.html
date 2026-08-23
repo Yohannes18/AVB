@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="session-ref" content="{{ STUDENT_ID }}">
+    <title>Batch Configuration Import – SecureBank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:#0a0f1e;color:#e2e8f0;min-height:100vh;}
+        .navbar{background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(20px);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+        .nav-brand{display:flex;align-items:center;gap:12px;}
+        .nav-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#c084fc,#9333ea);display:flex;align-items:center;justify-content:center;font-size:18px;}
+        .nav-title{font-size:18px;font-weight:700;color:#fff;}
+        .nav-links a{color:#94a3b8;text-decoration:none;margin-left:20px;font-size:14px;font-weight:500;transition:color .2s;}
+        .nav-links a:hover{color:#fff;}
+        .nav-user{display:flex;align-items:center;gap:10px;margin-left:20px;}
+        .avatar-link{text-decoration:none;display:flex;align-items:center;}
+        .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c084fc,#9333ea);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;transition:all .2s;border:2px solid transparent;}
+        .avatar-link:hover .avatar{border-color:rgba(192,132,252,0.6);box-shadow:0 0 12px rgba(192,132,252,0.4);transform:scale(1.05);}
+        .container{max-width:700px;margin:0 auto;padding:40px 24px;}
+        h1{font-size:28px;font-weight:700;margin-bottom:8px;}
+        .subtitle{color:#64748b;font-size:14px;margin-bottom:32px;}
+        .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;margin-bottom:24px;}
+        .card-title{font-size:16px;font-weight:600;color:#f1f5f9;margin-bottom:20px;}
+        .btn{padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;background:linear-gradient(135deg,#c084fc,#9333ea);color:#fff;font-family:'Inter',sans-serif;margin-top:16px;}
+        input[type=file]{display:block;padding:14px;background:rgba(255,255,255,0.04);border:1px dashed rgba(192,132,252,0.3);border-radius:10px;color:#94a3b8;width:100%;cursor:pointer;}
+    </style>
+</head>
+<body data-session-ref="{{ STUDENT_ID }}">
+<nav class="navbar">
+    <div class="nav-brand"><div class="nav-icon">⬆️</div><div class="nav-title">SecureBank Portal</div></div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/upload">Documents</a>
+        <a href="/search">Directory</a>
+        <a href="/fetch">Connect External Account</a>
+        <a href="/fetch-url">Partner Data Sync</a>
+        <a href="/render-template">Account Statements</a>
+        <a href="/crypto">Security Center</a>
+        <a href="/advanced-import">Account Migration</a>
+        <a href="/secure-transfer">Express Transfer</a>
+        <a href="/backup">Data Archival</a>
+        <a href="/admin">System Administration</a>
+        <a href="/execute">System Diagnostics</a>
+        <a href="/import">Batch Import</a>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="nav-user">
+        <a href="/profile" class="avatar-link" title="User Profile">
+            <div class="avatar">{{ user['username'][0].upper() if user else 'A' }}</div>
+        </a>
+    </div>
+</nav>
+<div class="container">
+    <h1>⬆ Batch Configuration Import</h1>
+    <p class="subtitle">Upload batch configuration and provisioning YAML objects.</p>
+
+    <div class="card">
+        <div class="card-title">Upload YAML Configuration</div>
+        <form method="POST" action="/import" enctype="multipart/form-data" id="import-form">
+            <input type="file" name="file" id="yaml-file" accept=".yml,.yaml,.txt">
+            <button type="submit" class="btn">Import Batch File</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
