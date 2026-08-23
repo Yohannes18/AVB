@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Flag Acceptor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { color: #38bdf8; margin: 0; }
+        .nav-links a { color: #94a3b8; text-decoration: none; margin-left: 20px; font-weight: 600; }
+        .nav-links a:hover { color: white; }
+        
+        .card { background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .progress-text { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .progress-bar { background: #334155; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 30px; }
+        .progress-fill { background: linear-gradient(90deg, #38bdf8, #818cf8); height: 100%; transition: width 0.5s ease; }
+        
+        .submit-area { display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px 16px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 16px; font-family: monospace; }
+        button { padding: 12px 24px; background: #38bdf8; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0ea5e9; }
+        
+        .flash { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; }
+        .flash.success { background: rgba(34, 197, 94, 0.2); border: 1px solid #4ade80; color: #4ade80; }
+        .flash.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #f87171; color: #f87171; }
+        .flash.warning { background: rgba(245, 158, 11, 0.2); border: 1px solid #fbbf24; color: #fbbf24; }
+        
+        .log { margin-top: 30px; }
+        .log h3 { color: #94a3b8; font-size: 16px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .log-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .vuln-name { color: #818cf8; font-weight: bold; }
+        .time { color: #64748b; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Intern: {{ intern_id }}</h1>
+            <div class="nav-links">
+                <a href="/leaderboard">Leaderboard</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="progress-text">Progress: {{ progress }} / {{ total_vulns }} Flags Found</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ (progress / total_vulns) * 100 }}%"></div>
+            </div>
+            
+            <form method="POST" class="submit-area">
+                <input type="text" name="flag" placeholder="FLAG{...}" required autocomplete="off">
+                <button type="submit">Submit Flag</button>
+            </form>
+        </div>
+        
+        <div class="card log">
+            <h3>Recent Submissions</h3>
+            {% if submissions %}
+                {% for sub in submissions %}
+                <div class="log-item">
+                    <span class="vuln-name">✔️ {{ sub.vuln_key }}</span>
+                    <span class="time">{{ sub.submitted_at }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="color: #64748b; text-align: center; padding: 20px;">No flags submitted yet. Get hacking!</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
