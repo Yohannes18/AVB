@@ -33,18 +33,20 @@ def test_intern_id_flow():
     print(f"Database stored intern_id for admin: {row[0] if row else None}")
     assert row and row[0] == 'INT-TEST99', "Intern ID was not persisted in bank.db users table"
     
-    # 5. Check GET /setup when already configured (should be read-only / locked)
-    r_setup_revisit = s.get(f"{BASE_URL}/setup")
-    assert r_setup_revisit.status_code == 200, "Failed GET /setup"
-    assert "Your Registration ID is locked to INT-TEST99" in r_setup_revisit.text, "Lock notice missing from GET /setup"
-    print("Re-visiting GET /setup correctly shows lock banner: 'Your Registration ID is locked to INT-TEST99'")
+    # 5. Check GET /setup when already configured (should redirect to /profile)
+    r_setup_revisit = s.get(f"{BASE_URL}/setup", allow_redirects=True)
+    assert r_setup_revisit.status_code == 200, "Failed GET /setup redirect"
+    assert "/profile" in r_setup_revisit.url, "GET /setup did not redirect to /profile"
+    assert "Your Registration ID is permanently locked to INT-TEST99" in r_setup_revisit.text, "Lock notice missing from redirected /profile page"
+    print("Re-visiting GET /setup correctly REDIRECTED to /profile with lock notice: 'Your Registration ID is permanently locked to INT-TEST99'")
 
-    # 6. Attempt POST /setup with a different ID (should be rejected and locked)
+    # 6. Attempt POST /setup with a different ID (should redirect to /profile and block re-configuration)
     r_reconfig = s.post(f"{BASE_URL}/setup", data={'intern_id': 'INT-NEWID123'}, allow_redirects=True)
-    assert "Registration ID is locked to INT-TEST99" in r_reconfig.text, "POST reconfiguration was not blocked"
-    print("POST /setup reconfiguration attempt was successfully BLOCKED and rejected!")
+    assert "/profile" in r_reconfig.url, "POST /setup did not redirect to /profile"
+    assert "INT-TEST99" in r_reconfig.text, "ID was changed despite lockdown"
+    print("POST /setup reconfiguration attempt was successfully BLOCKED and redirected away!")
 
-    print("\n---> ALL PERMANENT INTERN ID LOCKING & PROTECTION TESTS PASSED!")
+    print("\n---> ALL PERMANENT INTERN ID LOCKING & IMMEDIATE REDIRECT TESTS PASSED!")
 
 if __name__ == '__main__':
     test_intern_id_flow()
