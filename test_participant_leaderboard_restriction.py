@@ -32,10 +32,20 @@ def test_leaderboard_restriction():
 
     # 4. Attempt to access GET /admin/leaderboard as participant (should redirect away with admin error)
     r_admin_lb = s.get(f"{BASE_URL}/admin/leaderboard", allow_redirects=True)
-    assert "Admin access required." in r_admin_lb.text or "/admin/leaderboard" not in r_admin_lb.url, "Participant accessed admin leaderboard"
+    assert "/admin/leaderboard" not in r_admin_lb.url, "Participant accessed admin leaderboard"
+    assert "Admin access required." in r_admin_lb.text or "/dashboard" in r_admin_lb.url, "Admin access check failed"
     print("✓ Participant GET /admin/leaderboard attempt correctly blocked by admin_required decorator.")
 
-    print("\n---> ALL PARTICIPANT LEADERBOARD RESTRICTION TESTS PASSED!")
+    # 5. Session Isolation Test: Login as Admin, then log in as Intern on same session
+    s_reuse = requests.Session()
+    s_reuse.post(BASE_URL, data={'action': 'check', 'identifier': 'admin', 'password': 'super_secret_admin_password_123'})
+    # Now log in as intern
+    s_reuse.post(BASE_URL, data={'action': 'check', 'identifier': ident, 'password': pwd})
+    r_leak_test = s_reuse.get(f"{BASE_URL}/admin/leaderboard", allow_redirects=True)
+    assert "/admin/leaderboard" not in r_leak_test.url, "Intern inherited admin session!"
+    print("✓ Intern logging in after Admin successfully clears admin session privileges and blocks access to /admin/leaderboard!")
+
+    print("\n---> ALL PARTICIPANT LEADERBOARD RESTRICTION & SESSION ISOLATION TESTS PASSED!")
 
 if __name__ == '__main__':
     test_leaderboard_restriction()
