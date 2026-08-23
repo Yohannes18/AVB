@@ -1,24 +1,91 @@
 <!DOCTYPE html>
-<html>
-<head><title>Search</title>
-<style>
-body{font-family:Segoe UI;background:linear-gradient(135deg,#1e3a8a,#3b82f6);margin:0;height:100vh;display:flex;align-items:center;justify-content:center;}
-.box{background:white;padding:40px;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.3);width:100%;max-width:600px;text-align:center;}
-input{width:70%;padding:14px;border-radius:10px;border:1px solid #ddd;}
-button{padding:14px 25px;background:#3b82f6;color:white;border:none;border-radius:10px;}
-pre{background:#f1f5f9;padding:20px;border-radius:12px;text-align:left;margin:20px 0;}
-</style>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="session-ref" content="{{ STUDENT_ID }}">
+    <title>Directory & Search – SecureBank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:#0a0f1e;color:#e2e8f0;min-height:100vh;}
+        .navbar{background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(20px);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+        .nav-brand{display:flex;align-items:center;gap:12px;}
+        .nav-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:18px;}
+        .nav-title{font-size:18px;font-weight:700;color:#fff;}
+        .nav-links a{color:#94a3b8;text-decoration:none;margin-left:20px;font-size:14px;font-weight:500;transition:color .2s;}
+        .nav-links a:hover{color:#fff;}
+        .nav-user{display:flex;align-items:center;gap:10px;margin-left:20px;}
+        .avatar-link{text-decoration:none;display:flex;align-items:center;}
+        .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;transition:all .2s;border:2px solid transparent;}
+        .avatar-link:hover .avatar{border-color:rgba(59,130,246,0.6);box-shadow:0 0 12px rgba(59,130,246,0.4);transform:scale(1.05);}
+        .container{max-width:900px;margin:0 auto;padding:40px 24px;}
+        h1{font-size:28px;font-weight:700;margin-bottom:8px;color:#f1f5f9;}
+        .subtitle{color:#64748b;font-size:14px;margin-bottom:32px;}
+        .search-box{display:flex;gap:12px;margin-bottom:32px;}
+        input[type=text]{flex:1;padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#f1f5f9;font-size:15px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;}
+        input:focus{border-color:rgba(59,130,246,.5);}
+        .btn{padding:14px 24px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:600;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-family:'Inter',sans-serif;}
+        .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px;}
+        .card-title{font-size:16px;font-weight:600;color:#f1f5f9;margin-bottom:20px;}
+        table{width:100%;border-collapse:collapse;}
+        th{text-align:left;padding:10px 12px;color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,0.06);}
+        td{padding:12px;color:#cbd5e1;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);}
+    </style>
 </head>
-<body>
-<div class="box">
-<h1>🔍 Search Transactions</h1>
-<form method="GET" action="/search">
-<input type="text" name="q" value="{{ query }}" placeholder="Search...">
-<button type="submit">Search</button>
-</form>
-<h3>Result:</h3>
-<pre>{{ result }}</pre>
-<a href="/dashboard">← Back</a>
+<body data-session-ref="{{ STUDENT_ID }}">
+<nav class="navbar">
+    <div class="nav-brand"><div class="nav-icon">🔍</div><div class="nav-title">SecureBank Portal</div></div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/upload">Documents</a>
+        <a href="/search">Directory</a>
+        <a href="/fetch">Connect External Account</a>
+        <a href="/fetch-url">Partner Data Sync</a>
+        <a href="/render-template">Account Statements</a>
+        <a href="/crypto">Security Center</a>
+        <a href="/advanced-import">Account Migration</a>
+        <a href="/secure-transfer">Express Transfer</a>
+        <a href="/backup">Data Archival</a>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="nav-user">
+        <a href="/profile" class="avatar-link" title="User Profile">
+            <div class="avatar">{{ user['username'][0].upper() if user else 'U' }}</div>
+        </a>
+    </div>
+</nav>
+<div class="container">
+    <h1>🔍 Transaction & User Directory</h1>
+    <p class="subtitle">Search system transactions and public records.</p>
+
+    <form method="GET" action="/search" id="search-form" class="search-box">
+        <input type="text" name="q" id="search-input" placeholder="Search transactions…" value="{{ query | safe }}">
+        <button type="submit" class="btn">Search Directory</button>
+    </form>
+
+    <div class="card">
+        <div class="card-title">Search Results</div>
+        {% if results %}
+        <table>
+            <thead>
+                <tr><th>From</th><th>To</th><th>Amount</th><th>Description</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ r[0] if r|length > 5 else r['from_account'] }}</td>
+                    <td>{{ r[1] if r|length > 5 else r['to_account'] }}</td>
+                    <td>{{ r[2] if r|length > 5 else r['amount'] }}</td>
+                    <td>{{ r[3] if r|length > 5 else r['description'] }}</td>
+                    <td>{{ r[4] if r|length > 5 else r['transaction_date'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color:#64748b;font-size:14px;">No results found{% if query %} for "<strong>{{ query }}</strong>"{% endif %}.</p>
+        {% endif %}
+    </div>
 </div>
 </body>
 </html>
