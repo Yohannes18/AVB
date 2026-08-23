@@ -2,69 +2,488 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Flag Acceptor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flag Acceptor Dashboard & Submission Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .header h1 { color: #38bdf8; margin: 0; }
-        .nav-links a { color: #94a3b8; text-decoration: none; margin-left: 20px; font-weight: 600; }
-        .nav-links a:hover { color: white; }
-        
-        .card { background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .progress-text { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-        .progress-bar { background: #334155; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 30px; }
-        .progress-fill { background: linear-gradient(90deg, #38bdf8, #818cf8); height: 100%; transition: width 0.5s ease; }
-        
-        .submit-area { display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px 16px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 16px; font-family: monospace; }
-        button { padding: 12px 24px; background: #38bdf8; color: #0f172a; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #0ea5e9; }
-        
-        .flash { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; }
-        .flash.success { background: rgba(34, 197, 94, 0.2); border: 1px solid #4ade80; color: #4ade80; }
-        .flash.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #f87171; color: #f87171; }
-        .flash.warning { background: rgba(245, 158, 11, 0.2); border: 1px solid #fbbf24; color: #fbbf24; }
-        
-        .log { margin-top: 30px; }
-        .log h3 { color: #94a3b8; font-size: 16px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .log-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .vuln-name { color: #818cf8; font-weight: bold; }
-        .time { color: #64748b; font-size: 14px; }
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --accent-cyan: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-amber: #fbbf24;
+            --accent-red: #f87171;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            color: var(--accent-cyan);
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .session-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            font-family: monospace;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+
+        /* Flash Banner */
+        .flash {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .flash.success { background: rgba(74, 222, 128, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); }
+        .flash.error { background: rgba(248, 113, 113, 0.15); border: 1px solid var(--accent-red); color: var(--accent-red); }
+        .flash.warning { background: rgba(251, 191, 36, 0.15); border: 1px solid var(--accent-amber); color: var(--accent-amber); }
+
+        /* Overview & Master Submit Card */
+        .overview-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .progress-stats {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .progress-bar-bg {
+            background: #334155;
+            height: 14px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            height: 100%;
+            transition: width 0.6s ease;
+        }
+
+        .quick-submit-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .quick-submit-box label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .submit-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        input.flag-input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: var(--bg-dark);
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input.flag-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        button.btn-submit {
+            padding: 12px 24px;
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            font-weight: 800;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        button.btn-submit:hover {
+            background: #0ea5e9;
+            transform: translateY(-1px);
+        }
+
+        /* Filter Controls */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-input {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: var(--bg-card);
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            width: 300px;
+        }
+        .filter-input:focus { border-color: var(--accent-cyan); }
+
+        /* Category Card */
+        .category-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+        }
+
+        .category-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            max-width: 800px;
+        }
+
+        .category-badge {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .category-badge.complete {
+            background: rgba(74, 222, 128, 0.15);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Flag Slots Grid */
+        .flag-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .flag-slot {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .flag-slot:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .flag-slot.solved {
+            border-color: rgba(74, 222, 128, 0.4);
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.05), rgba(30, 41, 59, 0.8));
+        }
+
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+
+        .slot-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .status-pill.solved { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-pill.unsolved { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.3); }
+
+        .slot-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 14px;
+            background: rgba(255,255,255,0.03);
+            padding: 8px 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        .slot-solved-info {
+            font-size: 12px;
+            color: var(--accent-green);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 0 4px 0;
+        }
+
+        .slot-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .slot-form input {
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+        .slot-form button {
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+
+        /* Recent Submissions Log */
+        .log-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 30px;
+        }
+
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .log-item:last-child { border-bottom: none; }
+        .vuln-name { color: var(--accent-purple); font-weight: 700; font-size: 14px; }
+        .time { color: var(--text-secondary); font-size: 13px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Top Header -->
         <div class="header">
-            <h1>Intern: {{ intern_id }}</h1>
+            <h1>
+                🚩 Flag Acceptor
+                <span class="session-badge">ID: {{ intern_id }}</span>
+            </h1>
             <div class="nav-links">
-                <a href="/logout">Logout</a>
+                <a href="/logout">Logout 🔒</a>
             </div>
         </div>
-        
+
+        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
+                    <div class="flash {{ category }}">
+                        {% if category == 'success' %}🎉{% elif category == 'warning' %}⚠️{% else %}❌{% endif %}
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <div class="card">
-            <div class="progress-text">Progress: {{ progress }} / {{ total_vulns }} Flags Found</div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {{ (progress / total_vulns) * 100 }}%"></div>
+        <!-- Overall Progress & Master Quick Submit -->
+        <div class="overview-card">
+            <div class="progress-header">
+                <div class="progress-title">Overall Competition Progress</div>
+                <div class="progress-stats">{{ progress }} / {{ total_vulns }} Flags Solved</div>
             </div>
-            
-            <form method="POST" class="submit-area">
-                <input type="text" name="flag" placeholder="FLAG{...}" required autocomplete="off">
-                <button type="submit">Submit Flag</button>
-            </form>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ (progress / total_vulns) * 100 }}%;"></div>
+            </div>
+
+            <div class="quick-submit-box">
+                <label>⚡ Master Quick Flag Submit</label>
+                <form method="POST" class="submit-form">
+                    <input type="text" name="flag" class="flag-input" placeholder="Paste any FLAG{...} here for instant validation" required autocomplete="off">
+                    <button type="submit" class="btn-submit">Submit Flag 🚀</button>
+                </form>
+            </div>
         </div>
-        
-        <div class="card log">
-            <h3>Recent Submissions</h3>
+
+        <!-- Controls / Search -->
+        <div class="controls-row">
+            <div class="section-title">
+                🎯 Challenge Categories (33 Vulnerabilities)
+            </div>
+            <input type="text" id="filter-box" class="filter-input" placeholder="🔍 Search flags or hints..." onkeyup="filterFlags()">
+        </div>
+
+        <!-- Categorized Challenge Cards -->
+        <div id="categories-container">
+            {% for cat in categories %}
+            <div class="category-card" data-cat-id="{{ cat.id }}">
+                <div class="category-header">
+                    <div>
+                        <div class="category-title">{{ cat.title }}</div>
+                        <div class="category-desc">{{ cat.description }}</div>
+                    </div>
+                    <div class="category-badge {% if cat.solved_count == cat.total_count %}complete{% endif %}">
+                        {{ cat.solved_count }} / {{ cat.total_count }} Solved
+                    </div>
+                </div>
+
+                <div class="flag-slots-grid">
+                    {% for f in cat.flags %}
+                    <div class="flag-slot {% if f.is_solved %}solved{% endif %}" data-flag-key="{{ f.key }}" data-search-text="{{ f.title|lower }} {{ f.hint|lower }}">
+                        <div>
+                            <div class="slot-header">
+                                <div class="slot-title">{{ f.title }}</div>
+                                {% if f.is_solved %}
+                                    <span class="status-pill solved">✔️ Solved</span>
+                                {% else %}
+                                    <span class="status-pill unsolved">📌 Unsolved</span>
+                                {% endif %}
+                            </div>
+                            <div class="slot-hint">
+                                💡 <strong>Hint:</strong> {{ f.hint }}
+                            </div>
+                        </div>
+
+                        {% if f.is_solved %}
+                            <div class="slot-solved-info">
+                                ✔️ Flag Solved ({{ f.submitted_at }})
+                            </div>
+                        {% else %}
+                            <form method="POST" class="slot-form">
+                                <input type="text" name="flag" class="flag-input" placeholder="FLAG{...}" required autocomplete="off">
+                                <button type="submit" class="btn-submit">Submit</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Submission History Log -->
+        <div class="log-card">
+            <div class="section-title" style="margin-bottom: 16px;">
+                📜 Recent Submissions Log
+            </div>
             {% if submissions %}
                 {% for sub in submissions %}
                 <div class="log-item">
@@ -73,9 +492,39 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div style="color: #64748b; text-align: center; padding: 20px;">No flags submitted yet. Get hacking!</div>
+                <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
+                    No flags submitted yet. Pick a vulnerability category above and start hacking!
+                </div>
             {% endif %}
         </div>
     </div>
+
+    <script>
+        function filterFlags() {
+            const query = document.getElementById('filter-box').value.toLowerCase().strip ? document.getElementById('filter-box').value.toLowerCase().trim() : document.getElementById('filter-box').value.toLowerCase();
+            const categoryCards = document.querySelectorAll('.category-card');
+
+            categoryCards.forEach(card => {
+                const slots = card.querySelectorAll('.flag-slot');
+                let hasVisibleSlot = false;
+
+                slots.forEach(slot => {
+                    const searchText = slot.getAttribute('data-search-text') || '';
+                    if (!query || searchText.includes(query)) {
+                        slot.style.display = 'flex';
+                        hasVisibleSlot = true;
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+
+                if (hasVisibleSlot) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 </html>
