@@ -90,15 +90,55 @@ CTF_FLAGS = {
 
 from flask import has_request_context
 
+@app.before_request
+def resolve_intern_id_context():
+    """Ensure intern_id is populated in session from cookies, headers, or query params on EVERY request."""
+    if has_request_context():
+        if not session.get('intern_id'):
+            cookie_id = request.cookies.get('intern_id') or request.cookies.get('session-ref')
+            header_id = request.headers.get('X-Intern-ID') or request.headers.get('Session-Ref')
+            arg_id = request.args.get('intern_id')
+            found_id = cookie_id or header_id or arg_id
+            if found_id and found_id.strip():
+                session['intern_id'] = found_id.strip()
+
+@app.after_request
+def set_intern_id_cookie(response):
+    """Persist intern_id in browser cookie across pre-login and post-login requests."""
+    if session.get('intern_id'):
+        response.set_cookie('intern_id', session['intern_id'], max_age=30*86400, httponly=False, samesite='Lax')
+    return response
+
+@app.route('/set_intern')
+def set_intern_id_route():
+    """Quick helper route for participants to bind their intern_id cookie before logging in."""
+    intern_id = request.args.get('intern_id', '').strip()
+    if intern_id:
+        session['intern_id'] = intern_id
+        flash(f"Session intern ID bound to {intern_id}!", "success")
+        resp = make_response(redirect(url_for('login')))
+        resp.set_cookie('intern_id', intern_id, max_age=30*86400, httponly=False, samesite='Lax')
+        return resp
+    flash("Missing intern_id parameter. Usage: /set_intern?intern_id=INT-XXXXX", "error")
+    return redirect(url_for('login'))
+
 def get_flag(key):
     """Return the dynamic flag for a given vulnerability key."""
     base_flag = CTF_FLAGS.get(key, 'FLAG{UNKNOWN}')
     
-    # Prioritize session ID (if registered dynamically), fallback to ENV
     student_id = 'DEFAULT'
     if has_request_context():
         if session.get('intern_id'):
             student_id = session.get('intern_id')
+        elif request.cookies.get('intern_id'):
+            student_id = request.cookies.get('intern_id')
+            session['intern_id'] = student_id
+        elif request.headers.get('X-Intern-ID'):
+            student_id = request.headers.get('X-Intern-ID')
+            session['intern_id'] = student_id
+        elif request.args.get('intern_id'):
+            student_id = request.args.get('intern_id')
+            session['intern_id'] = student_id
         elif session.get('user_id'):
             try:
                 conn = get_db()
@@ -115,7 +155,8 @@ def get_flag(key):
         student_id = os.environ.get('STUDENT_ID', 'DEFAULT')
     
     # Generate an 8-character suffix unique to this student and this vulnerability
-    suffix_seed = f"{key}:{student_id}:{app.secret_key}".encode()
+    secret = app.secret_key.encode() if isinstance(app.secret_key, str) else app.secret_key
+    suffix_seed = f"{key}:{student_id}:{secret.decode()}".encode()
     suffix = hashlib.md5(suffix_seed).hexdigest()[:8]
     
     # Strip the closing '}' and append the suffix
@@ -130,6 +171,8 @@ def inject_student_id():
     if has_request_context():
         if session.get('intern_id'):
             student_id = session.get('intern_id')
+        elif request.cookies.get('intern_id'):
+            student_id = request.cookies.get('intern_id')
         elif session.get('user_id'):
             try:
                 conn = get_db()

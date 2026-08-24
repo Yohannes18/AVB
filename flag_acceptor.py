@@ -584,12 +584,34 @@ def dashboard():
     if request.method == 'POST':
         submitted_flag = request.form.get('flag', '').strip()
         
-        # Check against all possible flags for this intern
+        # Check against all possible flags for this intern (including pre-login DEFAULT seed & base flags)
         found_vuln_key = None
         found_title = None
+
+        possible_student_ids = [
+            intern_id,
+            'DEFAULT',
+            os.environ.get('STUDENT_ID', 'DEFAULT')
+        ]
+
         for key in CTF_FLAGS.keys():
-            expected_flag = generate_student_flag(key, intern_id)
-            if submitted_flag == expected_flag:
+            # 1. Match generated flags across possible student IDs (including pre-login DEFAULT seed)
+            for sid in possible_student_ids:
+                if submitted_flag == generate_student_flag(key, sid):
+                    found_vuln_key = key
+                    break
+            if found_vuln_key:
+                break
+                
+            # 2. Match exact base flag or base stem without suffix
+            base_flag = CTF_FLAGS[key]
+            base_stem = base_flag[:-1] if base_flag.endswith('}') else base_flag
+            if submitted_flag == base_flag or submitted_flag == base_stem:
+                found_vuln_key = key
+                break
+
+            # 3. Match prefix stem (e.g., FLAG{SQLi_Auth_Byp4ss_L0g1n_V1ct0ry...)
+            if submitted_flag.startswith(base_stem) and submitted_flag.endswith('}'):
                 found_vuln_key = key
                 break
                 
