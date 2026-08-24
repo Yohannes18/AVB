@@ -146,6 +146,207 @@ FLAG_CATEGORIES = [
     }
 ]
 
+INTEL_DOSSIERS = {
+    'sqli_login': {
+        'case_id': 'CASE-2026-SQL01',
+        'codename': 'OPERATION GHOST AUTH',
+        'story': 'During an initial external vulnerability audit of SecureBank\'s web gateway, cyber intelligence agents intercepted an authentication protocol error. The internal authentication handler parses username parameters directly into SQL query strings without parameterization. A rogue analyst bypassed authentication by crafting a targeted SQL syntax termination sequence without providing a valid password.',
+        'tactical_clue': 'Investigate single quote character escaping and logical true conditions (OR \'1\'=\'1\') on the primary login interface.'
+    },
+    'sqli_register': {
+        'case_id': 'CASE-2026-SQL02',
+        'codename': 'OPERATION PROVISIONING INJECTION',
+        'story': 'Internal SOC telemetry captured anomalous database write spikes when customer accounts were provisioned. Field agents discovered that registration input parameters are concatenated into INSERT statements, allowing injected subqueries during account creation.',
+        'tactical_clue': 'Inject SQL subqueries into non-standard registration input fields to observe unescaped database execution.'
+    },
+    'sqli_search': {
+        'case_id': 'CASE-2026-SQL03',
+        'codename': 'OPERATION DIRECTORY EXFILTRATION',
+        'story': 'Bank directory lookups were compromised after a rogue external feed attempted UNION-based dataset merging. The employee search endpoint reflects database column structures directly back to the active session HTTP response.',
+        'tactical_clue': 'Use UNION SELECT statements to match table column counts and exfiltrate database rows from sqlite_master or users tables.'
+    },
+    'sqli_transfer': {
+        'case_id': 'CASE-2026-SQL04',
+        'codename': 'OPERATION BALANCE SPOOF',
+        'story': 'Financial auditors noticed unexplained balance increases in non-custodial accounts. Further investigation revealed the wire transfer routine evaluates target account handles via string manipulation rather than parameterized prepared statements.',
+        'tactical_clue': 'Supply SQL manipulation fragments in transfer target parameters to override target balance update queries.'
+    },
+    'sqli_profile': {
+        'case_id': 'CASE-2026-SQL05',
+        'codename': 'OPERATION IDENTITY MODIFICATION',
+        'story': 'During account settings maintenance, system telemetry flagged unexpected modifications to user privilege flags. Profile updating SQL routines fail to sanitize bio and contact inputs.',
+        'tactical_clue': 'Craft inline SQL update payloads within profile fields to alter restricted account metadata.'
+    },
+    'sqli_api': {
+        'case_id': 'CASE-2026-SQL06',
+        'codename': 'OPERATION DATABASE EXFILTRATION API',
+        'story': 'API monitoring endpoints exposed raw SQL error stack traces to unauthenticated clients. Analysis confirmed that REST filtering queries dynamically assemble query strings from URL parameters.',
+        'tactical_clue': 'Leverage raw API query parameters to dump full system database schema tables.'
+    },
+    'blind_sqli': {
+        'case_id': 'CASE-2026-SQL07',
+        'codename': 'OPERATION SILENT ECHO',
+        'story': 'A sophisticated threat actor extracted internal system hashes without generating application error messages. The target endpoint evaluates conditions silently via stacked queries and conditional time delays.',
+        'tactical_clue': 'Utilize stacked query conditions and time-delay functions (or sleep delays) to extract secrets char-by-char.'
+    },
+    'cmd_injection': {
+        'case_id': 'CASE-2026-RCE01',
+        'codename': 'OPERATION ARCHIVE SHELL',
+        'story': 'System administrators configured an automated system backup tool executing sub-process binary calls. Threat intel confirmed filename input parameters pass unsanitized shell meta-characters directly to the underlying OS shell.',
+        'tactical_clue': 'Append command separators (e.g. semicolon, pipe, or backticks) in backup filename inputs to execute OS commands.'
+    },
+    'rce_eval': {
+        'case_id': 'CASE-2026-RCE02',
+        'codename': 'OPERATION CALCULATOR BREACH',
+        'story': 'SecureBank\'s internal diagnostic portal contained a mathematical expression evaluator. Incident response teams discovered the backend invokes Python\'s eval() function directly on unvalidated user input strings.',
+        'tactical_clue': 'Supply Python built-in modules or __import__(\'os\').popen() expressions inside the expression evaluator.'
+    },
+    'ssti': {
+        'case_id': 'CASE-2026-RCE03',
+        'codename': 'OPERATION STATEMENT INJECTION',
+        'story': 'Customer account statement customization allowed user-defined template strings. The Jinja2 rendering pipeline evaluates raw user templates without sandbox restrictions, opening server memory and environment variables.',
+        'tactical_clue': 'Use Jinja2 template syntax {{ self.__init__.__globals__.__builtins__... }} to read environment variables and execute system binaries.'
+    },
+    'pickle_rce': {
+        'case_id': 'CASE-2026-RCE04',
+        'codename': 'OPERATION SERIAL PAYLOAD',
+        'story': 'Data sync utilities accept serialized Python objects from external partners. The deserialization handler calls pickle.loads() on raw uploaded files without signature verification.',
+        'tactical_clue': 'Construct a custom Python object with a __reduce__ method returning os.system execution commands.'
+    },
+    'yaml_rce': {
+        'case_id': 'CASE-2026-RCE05',
+        'codename': 'OPERATION YAML PROVISIONER',
+        'story': 'System configuration updates ingest YAML provisioning scripts. Analysis confirmed the parser uses unsafe yaml.load() instead of yaml.safe_load(), allowing Python object instantiation.',
+        'tactical_clue': 'Embed !!python/object/apply:os.system tags inside uploaded YAML configuration files.'
+    },
+    'deser_chain': {
+        'case_id': 'CASE-2026-RCE06',
+        'codename': 'OPERATION GADGET CHAIN',
+        'story': 'An advanced multi-stage cyber assault combined multiple data ingestion utilities (Pickle, Zip, and YAML) into a full server takeover vector.',
+        'tactical_clue': 'Leverage advanced deserialization gadget chains across archive and object processing endpoints.'
+    },
+    'hardcoded_secret': {
+        'case_id': 'CASE-2026-AUT01',
+        'codename': 'OPERATION STATIC KEY EXPOSURE',
+        'story': 'Source code review of the bank\'s portal revealed hardcoded cryptographic variables and secret keys embedded directly in application configuration files.',
+        'tactical_clue': 'Inspect application configuration files, environment definitions, or client assets for static key strings.'
+    },
+    'xss_stored': {
+        'case_id': 'CASE-2026-AUT02',
+        'codename': 'OPERATION PERSISTENT SCRIPT',
+        'story': 'Feedback forms and profile comment sections failed to encode HTML entity tags before storing entries in the database, allowing persistent script execution in administrator dashboards.',
+        'tactical_clue': 'Submit persistent <script> tags or onerror image handlers into customer feedback fields.'
+    },
+    'idor': {
+        'case_id': 'CASE-2026-AUT03',
+        'codename': 'OPERATION DIRECT REFERENCE',
+        'story': 'Customer account statement endpoints fetch user documents based on sequential numeric URL parameters without verifying session ownership.',
+        'tactical_clue': 'Modify numeric account or document ID parameters in HTTP request paths to view other users\' sensitive files.'
+    },
+    'session_fixation': {
+        'case_id': 'CASE-2026-AUT04',
+        'codename': 'OPERATION TOKEN BINDING',
+        'story': 'The authentication service reuses pre-login session tokens after successful user login rather than generating fresh session identifiers upon authentication.',
+        'tactical_clue': 'Inject a pre-determined session token prior to authentication and verify session persistence post-login.'
+    },
+    'reset_bypass': {
+        'case_id': 'CASE-2026-AUT05',
+        'codename': 'OPERATION PASSWORD RESET FLAW',
+        'story': 'Security auditors identified weak randomness and missing account binding validation in the automated password reset token verification workflow.',
+        'tactical_clue': 'Analyze password reset token parameters and request bodies to bypass account ownership verification.'
+    },
+    'header_bypass': {
+        'case_id': 'CASE-2026-AUT06',
+        'codename': 'OPERATION ADMIN HEADER OVERRIDE',
+        'story': 'Internal administrative portals trust custom HTTP headers (such as X-Admin-Role or X-Forwarded-User) set by upstream proxies without cryptographically verifying client identity.',
+        'tactical_clue': 'Inject custom administrative HTTP headers into request requests targeting restricted admin sub-routes.'
+    },
+    'mass_export': {
+        'case_id': 'CASE-2026-AUT07',
+        'codename': 'OPERATION UNAUTHENTICATED MASS EXPORT',
+        'story': 'An unauthenticated API endpoint created for legacy database backup exports remained publicly accessible without token authentication.',
+        'tactical_clue': 'Locate unauthenticated export API endpoints to download complete database table dumps.'
+    },
+    'debug_endpoint': {
+        'case_id': 'CASE-2026-AUT08',
+        'codename': 'OPERATION DEBUG SECRET EXPOSURE',
+        'story': 'Developers left hidden debugging sub-routes active in the production routing table. Accessing these endpoints dumps active environment variables and process memory.',
+        'tactical_clue': 'Discover hidden /debug or /env endpoints to inspect active environment variables and keys.'
+    },
+    'jwt_weak': {
+        'case_id': 'CASE-2026-JWT01',
+        'codename': 'OPERATION WEAK HMAC KEY',
+        'story': 'Authentication tokens generated by the portal are signed using HMAC-SHA256 with a short, dictionary-vulnerable secret passphrase.',
+        'tactical_clue': 'Extract signed JWT cookies and perform offline dictionary cracking to forge admin claims.'
+    },
+    'jwt_confusion': {
+        'case_id': 'CASE-2026-JWT02',
+        'codename': 'OPERATION ALGORITHM SWITCH',
+        'story': 'JWT verification routines permit switching token algorithm headers from RS256 to HS256, tricking the server into verifying the token using its public key as an HMAC secret.',
+        'tactical_clue': 'Modify the JWT header "alg" to "HS256" and sign the payload using the server\'s public key.'
+    },
+    'oauth_redirect': {
+        'case_id': 'CASE-2026-JWT03',
+        'codename': 'OPERATION OAUTH REDIRECT LEAK',
+        'story': 'OAuth authorization callbacks fail to validate exact redirect URIs against a strict whitelist, permitting token redirection to arbitrary external domains.',
+        'tactical_clue': 'Manipulate the redirect_uri parameter in OAuth authentication flows to intercept authorization codes.'
+    },
+    'lfi': {
+        'case_id': 'CASE-2026-FIL01',
+        'codename': 'OPERATION TRAVERSAL LEAK',
+        'story': 'Document viewer utilities accept relative path file arguments without sanitizing directory traversal sequences (../).',
+        'tactical_clue': 'Supply relative path sequences (../../../../etc/passwd) to inspect sensitive local system files.'
+    },
+    'xxe': {
+        'case_id': 'CASE-2026-FIL02',
+        'codename': 'OPERATION XML ENTITY EXPLOIT',
+        'story': 'XML transaction parsing utilities enable external entity resolution by default. External entities specified in XML payloads resolve local file URIs.',
+        'tactical_clue': 'Include <!DOCTYPE> declarations with SYSTEM "file:///etc/passwd" entities in XML parsing requests.'
+    },
+    'upload_webshell': {
+        'case_id': 'CASE-2026-FIL03',
+        'codename': 'OPERATION WEBSHELL UPLOAD',
+        'story': 'Document storage uploads check file extensions client-side only. Uploaded executable files are saved directly into publicly accessible web directories.',
+        'tactical_clue': 'Bypass client-side file extensions to upload an executable script file into the web server directory.'
+    },
+    'zip_slip': {
+        'case_id': 'CASE-2026-FIL04',
+        'codename': 'OPERATION ZIP SLIP OVERWRITE',
+        'story': 'Archive extraction tools unpack ZIP archives without validating target extraction file paths, allowing archives to write files outside the destination directory.',
+        'tactical_clue': 'Craft a ZIP archive containing file paths with directory traversal sequences to overwrite system files.'
+    },
+    'ssrf_basic': {
+        'case_id': 'CASE-2026-SRF01',
+        'codename': 'OPERATION INTERNAL REQUEST FETCH',
+        'story': 'Partner integration modules fetch remote URL resources on behalf of clients. The fetcher lacks network restriction controls, allowing requests to internal localhost services.',
+        'tactical_clue': 'Point the URL fetcher at http://127.0.0.1 or internal private subnets to reach internal admin interfaces.'
+    },
+    'ssrf_advanced': {
+        'case_id': 'CASE-2026-SRF02',
+        'codename': 'OPERATION DNS REBIND BYPASS',
+        'story': 'An updated SSRF fetcher implements a basic IP blocklist for 127.0.0.1. Advanced security researchers bypassed the filter using alternate IP representations and short-TTL DNS rebinding.',
+        'tactical_clue': 'Utilize decimal IP encodings (2130706433), octal encodings (0177.0.0.1), or DNS rebinding domains.'
+    },
+    'toctou': {
+        'case_id': 'CASE-2026-CRY01',
+        'codename': 'OPERATION DOUBLE SPEND RACE',
+        'story': 'Wire transfer processing verifies account balance state prior to database transaction commitment without applying database write locks.',
+        'tactical_clue': 'Send parallel concurrent transfer requests simultaneously to execute double withdrawals before balance validation completes.'
+    },
+    'crypto_aes': {
+        'case_id': 'CASE-2026-CRY02',
+        'codename': 'OPERATION DETERMINISTIC ECB PATTERN',
+        'story': 'Sensitive transaction logs are encrypted using AES in ECB mode (or static Initialization Vectors), resulting in identical plaintext blocks producing identical ciphertext outputs.',
+        'tactical_clue': 'Analyze repeating 16-byte block patterns in encrypted data strings to decipher encrypted content.'
+    },
+    'crypto_rsa': {
+        'case_id': 'CASE-2026-CRY03',
+        'codename': 'OPERATION WEAK PRIME FACTORIZATION',
+        'story': 'Digital signature verification uses small 512-bit RSA moduli generated from small prime factors without OAEP padding.',
+        'tactical_clue': 'Extract public modulus N, factor N into primes p and q, and compute the private exponent d to forge signatures.'
+    }
+}
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 def generate_student_flag(key, student_id):
@@ -464,6 +665,52 @@ def public_leaderboard():
         return redirect(url_for('admin_leaderboard'))
     flash("The leaderboard is restricted to administrators.", "warning")
     return redirect(url_for('dashboard'))
+
+@app.route('/intel')
+@login_required
+def intel_dossier():
+    intern_id = session['intern_id']
+    focus_key = request.args.get('focus', '').strip()
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT vuln_key FROM submissions WHERE intern_id = ?", (intern_id,))
+    solved_keys = set(row['vuln_key'] for row in cursor.fetchall())
+    conn.close()
+
+    # Build Intel Dossiers by Category
+    categories_intel = []
+    for cat in FLAG_CATEGORIES:
+        flags_intel = []
+        for f in cat['flags']:
+            key = f['key']
+            dossier = INTEL_DOSSIERS.get(key, {
+                'case_id': f'CASE-{key.upper()}',
+                'codename': f['title'].upper(),
+                'story': f['hint'],
+                'tactical_clue': f['hint']
+            })
+            flags_intel.append({
+                'key': key,
+                'title': f['title'],
+                'is_solved': key in solved_keys,
+                'case_id': dossier['case_id'],
+                'codename': dossier['codename'],
+                'story': dossier['story'],
+                'tactical_clue': dossier['tactical_clue']
+            })
+        categories_intel.append({
+            'id': cat['id'],
+            'title': cat['title'],
+            'icon': cat['icon'],
+            'description': cat['description'],
+            'flags': flags_intel
+        })
+
+    return render_template('acceptor_intel.html', 
+                           intern_id=intern_id, 
+                           categories=categories_intel,
+                           focus_key=focus_key)
 
 @app.route('/admin/leaderboard')
 @admin_required

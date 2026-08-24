@@ -29,3 +29,5 @@ services:
     volumes:
       - ./scoreboard.db:/app/scoreboard.db
       - ./backups:/app/backups
+      - ./flag_acceptor.py:/app/flag_acceptor.py
+      - ./templates:/app/templates

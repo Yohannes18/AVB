@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Intelligence Dossier – SecureBank CTF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --accent-cyan: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-amber: #fbbf24;
+            --accent-red: #f87171;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            color: var(--accent-cyan);
+            font-size: 24px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .session-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            font-family: 'Fira Code', monospace;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+
+        .btn-dash {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan) !important;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        /* Overview Banner */
+        .intel-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+            border: 1px solid rgba(192, 132, 252, 0.2);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intel-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: linear-gradient(180deg, var(--accent-purple), var(--accent-cyan));
+        }
+
+        .intel-banner h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent-purple);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .intel-banner p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Controls */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-input {
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: var(--bg-card);
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            width: 340px;
+            transition: border-color 0.2s;
+        }
+        .filter-input:focus { border-color: var(--accent-purple); }
+
+        /* Case Dossier Grid */
+        .dossier-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .category-group {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .case-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .case-card:last-child { margin-bottom: 0; }
+
+        .case-card.focused {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 20px rgba(192, 132, 252, 0.3);
+            transform: scale(1.01);
+        }
+
+        .case-card.solved {
+            border-color: rgba(74, 222, 128, 0.3);
+        }
+
+        .case-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .case-id {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            background: rgba(192, 132, 252, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(192, 132, 252, 0.2);
+        }
+
+        .case-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+        .status-pill.solved { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-pill.unsolved { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.3); }
+
+        .story-box {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            border-left: 3px solid var(--accent-purple);
+            font-size: 13px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .clue-box {
+            background: rgba(56, 189, 248, 0.05);
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px dashed rgba(56, 189, 248, 0.3);
+            font-size: 13px;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .clue-box strong {
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        .action-bar {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-submit-link {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--bg-dark);
+            background: var(--accent-cyan);
+            padding: 6px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-submit-link:hover {
+            background: #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Header -->
+        <div class="header">
+            <h1>
+                📜 Operation Intelligence Logs
+                <span class="session-badge">ID: {{ intern_id }}</span>
+            </h1>
+            <div class="nav-links">
+                <a href="/dashboard" class="btn-dash">🚩 Challenge Dashboard</a>
+                <a href="/logout">Logout 🔒</a>
+            </div>
+        </div>
+
+        <!-- Intel Banner -->
+        <div class="intel-banner">
+            <h2>🕵️ Confidential Cyber Incident Dossiers</h2>
+            <p>
+                Welcome to the SecureBank Cyber Reconnaissance Intelligence Archive. Each case file documents a real-world security incident intercepted by our Security Operations Center (SOC). Read the narrative logs carefully to discover tactical clues and identify the underlying vulnerability vectors.
+            </p>
+        </div>
+
+        <!-- Controls / Search -->
+        <div class="controls-row">
+            <h3 style="color: #fff; font-size: 18px; font-weight: 800;">
+                📂 Case Files Archive (33 Intercepted Operations)
+            </h3>
+            <input type="text" id="filter-box" class="filter-input" placeholder="🔍 Search case files, codenames, or clues..." onkeyup="filterCases()">
+        </div>
+
+        <!-- Case Dossier Grid -->
+        <div class="dossier-grid" id="dossier-grid">
+            {% for cat in categories %}
+            <div class="category-group" data-cat-id="{{ cat.id }}">
+                <div class="category-header">
+                    <span style="font-size: 22px;">{{ cat.icon }}</span>
+                    <div class="category-title">{{ cat.title }}</div>
+                </div>
+
+                {% for f in cat.flags %}
+                <div class="case-card {% if f.is_solved %}solved{% endif %} {% if f.key == focus_key %}focused{% endif %}" id="case-{{ f.key }}" data-search-text="{{ f.case_id|lower }} {{ f.codename|lower }} {{ f.title|lower }} {{ f.story|lower }} {{ f.tactical_clue|lower }}">
+                    <div class="case-meta">
+                        <span class="case-id">📁 {{ f.case_id }} // {{ f.codename }}</span>
+                        {% if f.is_solved %}
+                            <span class="status-pill solved">✔️ Solved</span>
+                        {% else %}
+                            <span class="status-pill unsolved">📌 Active Investigation</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="case-title">{{ f.title }}</div>
+
+                    <div class="story-box">
+                        📜 <strong>SOC Incident Log:</strong><br>
+                        {{ f.story }}
+                    </div>
+
+                    <div class="clue-box">
+                        💡 <div><strong>Tactical Clue:</strong> {{ f.tactical_clue }}</div>
+                    </div>
+
+                    <div class="action-bar">
+                        <a href="/dashboard#flag-{{ f.key }}" class="btn-submit-link">Submit Flag on Dashboard 🚀</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function filterCases() {
+            const query = document.getElementById('filter-box').value.toLowerCase().trim();
+            const groups = document.querySelectorAll('.category-group');
+
+            groups.forEach(group => {
+                const cards = group.querySelectorAll('.case-card');
+                let hasVisibleCard = false;
+
+                cards.forEach(card => {
+                    const searchText = card.getAttribute('data-search-text') || '';
+                    if (!query || searchText.includes(query)) {
+                        card.style.display = 'block';
+                        hasVisibleCard = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (hasVisibleCard) {
+                    group.style.display = 'block';
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+        }
+
+        // Auto-scroll to focused case if specified
+        window.addEventListener('DOMContentLoaded', () => {
+            const focusKey = "{{ focus_key }}";
+            if (focusKey) {
+                const targetCard = document.getElementById('case-' + focusKey);
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

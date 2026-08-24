@@ -323,15 +323,28 @@
         .status-pill.solved { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .status-pill.unsolved { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.3); }
 
-        .slot-hint {
+        .btn-intel-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-            margin-bottom: 14px;
-            background: rgba(255,255,255,0.03);
-            padding: 8px 10px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            background: rgba(192, 132, 252, 0.1);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            padding: 6px 12px;
             border-radius: 6px;
-            border-left: 3px solid var(--accent-cyan);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .btn-intel-link:hover {
+            background: rgba(192, 132, 252, 0.25);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(192, 132, 252, 0.3);
+        }
+
+        .slot-hint {
+            margin-bottom: 12px;
         }
 
         .slot-solved-info {
@@ -388,6 +401,7 @@
                 <span class="session-badge">ID: {{ intern_id }}</span>
             </h1>
             <div class="nav-links">
+                <a href="/intel" class="btn-intel-link">📜 Operation Intel Logs</a>
                 <a href="/logout">Logout 🔒</a>
             </div>
         </div>
@@ -428,7 +442,7 @@
             <div class="section-title">
                 🎯 Challenge Categories (33 Vulnerabilities)
             </div>
-            <input type="text" id="filter-box" class="filter-input" placeholder="🔍 Search flags or hints..." onkeyup="filterFlags()">
+            <input type="text" id="filter-box" class="filter-input" placeholder="🔍 Search flags..." onkeyup="filterFlags()">
         </div>
 
         <!-- Categorized Challenge Cards -->
@@ -447,7 +461,7 @@
 
                 <div class="flag-slots-grid">
                     {% for f in cat.flags %}
-                    <div class="flag-slot {% if f.is_solved %}solved{% endif %}" data-flag-key="{{ f.key }}" data-search-text="{{ f.title|lower }} {{ f.hint|lower }}">
+                    <div class="flag-slot {% if f.is_solved %}solved{% endif %}" id="flag-{{ f.key }}" data-flag-key="{{ f.key }}" data-search-text="{{ f.title|lower }} {{ f.hint|lower }}">
                         <div>
                             <div class="slot-header">
                                 <div class="slot-title">{{ f.title }}</div>
@@ -458,7 +472,7 @@
                                 {% endif %}
                             </div>
                             <div class="slot-hint">
-                                💡 <strong>Hint:</strong> {{ f.hint }}
+                                <a href="/intel?focus={{ f.key }}" class="btn-intel-link">📜 View Classified Intel Story</a>
                             </div>
                         </div>
 
