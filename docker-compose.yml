@@ -15,6 +15,7 @@ services:
       - ./config:/app/config
       - ./backups:/app/backups
       - ./app.py:/app/app.py
+      - ./templates:/app/templates
 
   # The Flag Acceptor Platform
   flag_acceptor:
