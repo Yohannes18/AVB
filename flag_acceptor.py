@@ -169,7 +169,7 @@ INTEL_DOSSIERS = {
         'case_id': 'CASE-2026-SQL04',
         'codename': 'OPERATION BALANCE SPOOF',
         'story': 'Financial auditors noticed unexplained balance increases in non-custodial accounts. Further investigation revealed the wire transfer routine evaluates target account handles via string manipulation rather than parameterized prepared statements.',
-        'tactical_clue': 'Supply SQL manipulation fragments in transfer target parameters to override target balance update queries.'
+        'tactical_clue': 'Supply SQL syntax (e.g., quotes, OR clauses, UNION, or comments) into transfer fields (from_account, to_account, amount) to alter query execution. Note: Changing sender usernames without SQL syntax is classified under IDOR.'
     },
     'sqli_profile': {
         'case_id': 'CASE-2026-SQL05',
@@ -240,8 +240,8 @@ INTEL_DOSSIERS = {
     'idor': {
         'case_id': 'CASE-2026-AUT03',
         'codename': 'OPERATION DIRECT REFERENCE',
-        'story': 'Customer account statement endpoints fetch user documents based on sequential numeric URL parameters without verifying session ownership.',
-        'tactical_clue': 'Modify numeric account or document ID parameters in HTTP request paths to view other users\' sensitive files.'
+        'story': 'The wire transfer and account access modules process transactions using user-supplied account handles without checking session authorization.',
+        'tactical_clue': 'Modify the sender account username (from_account) to transfer funds out of another user\'s account without using SQL injection syntax.'
     },
     'session_fixation': {
         'case_id': 'CASE-2026-AUT04',

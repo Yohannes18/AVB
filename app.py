@@ -571,9 +571,13 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
-        email    = request.form.get('email')
-        password = request.form.get('password')
+        username = request.form.get('username', '')
+        email    = request.form.get('email', '')
+        password = request.form.get('password', '')
+
+        sqli_indicators = ["'", '"', '--', 'OR ', 'UNION', 'SELECT', '/*', ';', 'INSERT']
+        combined = f"{username} {email} {password}".upper()
+        has_sqli = any(ind in combined for ind in sqli_indicators)
 
         with db_write_lock:
             conn   = get_db()
@@ -590,9 +594,14 @@ def register():
                 session['user_id']  = user_id
                 session['username'] = username
                 session['role']     = 'user'
+                if has_sqli:
+                    flash(f'[SQLI-REGISTER] {get_flag("sqli_register")}', 'success')
                 return redirect('/dashboard')
             except Exception as e:
-                flash(f'Error: {str(e)}', 'error')
+                if has_sqli:
+                    flash(f'[SQLI-REGISTER] {get_flag("sqli_register")}', 'success')
+                else:
+                    flash(f'Error: {str(e)}', 'error')
             finally:
                 conn.close()
     return render_template('register.html')
@@ -694,9 +703,23 @@ def dashboard():
 @app.route('/transfer', methods=['POST'])
 @login_required
 def transfer():
-    from_account = request.form.get('from_account')
-    to_account   = request.form.get('to_account')
-    amount       = float(request.form.get('amount', 0))
+    from_account = request.form.get('from_account', '').strip()
+    to_account   = request.form.get('to_account', '').strip()
+    amount_raw   = request.form.get('amount', '0').strip()
+    try:
+        amount = float(amount_raw)
+    except ValueError:
+        amount = 0.0
+
+    current_user = session.get('username')
+
+    # Detect SQL Injection payload indicators
+    sqli_indicators = ["'", '"', '--', 'OR ', 'UNION', 'SELECT', '/*', ';', 'UPDATE']
+    combined_input = f"{from_account} {to_account} {amount_raw}".upper()
+    has_sqli = any(ind in combined_input for ind in sqli_indicators)
+
+    # Detect IDOR / Parameter Tampering (transferring from another user's account without SQLi)
+    is_idor = (from_account != current_user) and not has_sqli
 
     with db_write_lock:
         conn   = get_db()
@@ -714,9 +737,18 @@ def transfer():
                 f"INSERT INTO transactions (from_account, to_account, amount) VALUES ('{from_account}', '{to_account}', {amount})"
             )
             conn.commit()
-            flash(f'Transfer complete! [SQLI-TRANSFER] {get_flag("sqli_transfer")}', 'success')
+
+            if has_sqli:
+                flash(f'Transfer executed via SQL Injection! [SQLI-TRANSFER] {get_flag("sqli_transfer")}', 'success')
+            elif is_idor:
+                flash(f'Transfer executed from unauthorized account ({from_account})! [IDOR] {get_flag("idor")}', 'warning')
+            else:
+                flash('Transfer complete!', 'success')
         else:
-            flash('Insufficient funds or account not found', 'error')
+            if has_sqli:
+                flash(f'SQL Injection query executed! [SQLI-TRANSFER] {get_flag("sqli_transfer")}', 'success')
+            else:
+                flash('Insufficient funds or account not found', 'error')
 
         conn.close()
     return redirect('/dashboard')
@@ -728,8 +760,12 @@ def profile():
     user_id = session['user_id']
 
     if request.method == 'POST':
-        username = request.form.get('username')
-        email    = request.form.get('email')
+        username = request.form.get('username', '')
+        email    = request.form.get('email', '')
+
+        sqli_indicators = ["'", '"', '--', 'OR ', 'UNION', 'SELECT', '/*', ';', 'UPDATE']
+        combined = f"{username} {email}".upper()
+        has_sqli = any(ind in combined for ind in sqli_indicators)
 
         with db_write_lock:
             conn   = get_db()
@@ -739,9 +775,15 @@ def profile():
                 cursor.execute(f"UPDATE users SET username = '{username}', email = '{email}' WHERE id = {user_id}")
                 conn.commit()
                 session['username'] = username
-                flash('Profile updated', 'success')
+                if has_sqli:
+                    flash(f'Profile updated via SQL Injection! [SQLI-PROFILE] {get_flag("sqli_profile")}', 'success')
+                else:
+                    flash('Profile updated', 'success')
             except Exception as e:
-                flash(f'Error updating profile: {str(e)}', 'error')
+                if has_sqli:
+                    flash(f'SQL Injection payload executed! [SQLI-PROFILE] {get_flag("sqli_profile")}', 'success')
+                else:
+                    flash(f'Error updating profile: {str(e)}', 'error')
             finally:
                 conn.close()
         return redirect('/profile')
