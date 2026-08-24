@@ -243,8 +243,8 @@ def login():
     if request.method == 'POST':
         action = request.form.get('action')
         
-        # --- STEP 1: Check Identifier / Sign In ---
-        if action == 'check':
+        # --- STEP 1: Check Identifier / Sign In / Register ---
+        if action in ['check', 'register']:
             identifier = request.form.get('identifier', '').strip().lower()
             password = request.form.get('password', '').strip()
             
@@ -284,9 +284,33 @@ def login():
                     flash("Invalid credentials.", "error")
                     return render_template('acceptor_index.html', step='step1', identifier=identifier)
             else:
-                # Unknown identifier -> Transition cleanly to Step 2 (Create Account)
-                flash("No account found for this ID. Set a password below to generate your persistent Session ID.", "info")
-                return render_template('acceptor_index.html', step='step2', identifier=identifier, initial_password=password)
+                if action == 'register':
+                    random_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+                    new_id = f"INT-{random_id}"
+                    pwd_hash = generate_password_hash(password)
+
+                    conn = get_db()
+                    cursor = conn.cursor()
+                    try:
+                        cursor.execute(
+                            "INSERT INTO interns (identifier, password_hash, intern_id) VALUES (?, ?, ?)",
+                            (identifier, pwd_hash, new_id)
+                        )
+                        conn.commit()
+                        conn.close()
+                    except sqlite3.IntegrityError:
+                        conn.close()
+                        flash("An account with this Email/Student ID already exists. Please sign in.", "error")
+                        return render_template('acceptor_index.html', step='step1', identifier=identifier)
+
+                    session.clear()
+                    session['intern_id'] = new_id
+                    flash(f"Registration successful! Your persistent Session ID is {new_id}", "success")
+                    return render_template('acceptor_index.html', step='logged_in', new_id=new_id, identifier=identifier)
+                else:
+                    # Unknown identifier -> Transition cleanly to Step 2 (Create Account)
+                    flash("No account found for this ID. Set a password below to generate your persistent Session ID.", "info")
+                    return render_template('acceptor_index.html', step='step2', identifier=identifier, initial_password=password)
 
         # --- STEP 2: Create Account & Generate Session ID ---
         elif action == 'create':
@@ -332,7 +356,7 @@ def login():
 
             session.clear()
             session['intern_id'] = new_id
-            flash(f"Account created successfully! Your persistent Session ID is {new_id}", "success")
+            flash(f"Registration successful! Account created successfully! Your persistent Session ID is {new_id}", "success")
             return render_template('acceptor_index.html', step='logged_in', new_id=new_id, identifier=identifier)
 
     # Check if already logged in via session

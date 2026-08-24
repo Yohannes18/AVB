@@ -1,0 +1,8 @@
+import sys
+import os
+
+# Ensure parent directory is in sys.path for test discovery and direct execution
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+

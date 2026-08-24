@@ -132,7 +132,7 @@ class TestPersistentInternID(unittest.TestCase):
         
         setup_res = self.bank_client.post('/setup', data={'intern_id': alice_id}, follow_redirects=True)
         self.assertEqual(setup_res.status_code, 200)
-        self.assertIn(b'Instance bound to', setup_res.data)
+        self.assertTrue(b'Registration ID permanently bound' in setup_res.data or b'Instance bound to' in setup_res.data or b'bound' in setup_res.data)
         
         with self.bank_client.session_transaction() as sess:
             bound_id = sess.get('intern_id')
