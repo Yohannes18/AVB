@@ -37,27 +37,7 @@
     </style>
 </head>
 <body data-session-ref="{{ STUDENT_ID }}">
-<nav class="navbar">
-    <div class="nav-brand"><div class="nav-icon">📁</div><div class="nav-title">SecureBank Portal</div></div>
-    <div class="nav-links">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/upload">Documents</a>
-        <a href="/search">Directory</a>
-        <a href="/fetch">Connect External Account</a>
-        <a href="/fetch-url">Partner Data Sync</a>
-        <a href="/render-template">Account Statements</a>
-        <a href="/crypto">Security Center</a>
-        <a href="/advanced-import">Account Migration</a>
-        <a href="/secure-transfer">Express Transfer</a>
-        <a href="/backup">Data Archival</a>
-        <a href="/logout">Logout</a>
-    </div>
-    <div class="nav-user">
-        <a href="/profile" class="avatar-link" title="User Profile">
-            <div class="avatar">{{ user['username'][0].upper() if user else 'U' }}</div>
-        </a>
-    </div>
-</nav>
+{% include 'navbar.html' %}
 <div class="container">
     <h1>📁 Document Storage & Attachments</h1>
     <p class="subtitle">Upload verification documents and account profile photos.</p>

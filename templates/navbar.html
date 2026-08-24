@@ -1,0 +1,263 @@
+<!-- Sleek Glassmorphic Navbar Styles -->
+<style>
+    /* ── Sleek Professional Navbar ── */
+    .navbar {
+        background: rgba(10, 15, 30, 0.85) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        padding: 0 28px !important;
+        height: 64px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+    .nav-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        text-decoration: none !important;
+        flex-shrink: 0 !important;
+    }
+    .nav-icon {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+    }
+    .nav-title {
+        font-size: 17px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        letter-spacing: -0.3px !important;
+        white-space: nowrap !important;
+    }
+    .nav-title span {
+        color: #3b82f6 !important;
+    }
+
+    .nav-menu {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        list-style: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .nav-item {
+        position: relative !important;
+        list-style: none !important;
+    }
+    .nav-link {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        color: #94a3b8 !important;
+        text-decoration: none !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .nav-link:hover, .nav-item:hover > .nav-link {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+    .nav-link.admin-link {
+        color: #f87171 !important;
+    }
+    .nav-link.admin-link:hover, .nav-item:hover > .nav-link.admin-link {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #fca5a5 !important;
+    }
+    .nav-link .caret {
+        font-size: 9px !important;
+        transition: transform 0.2s ease !important;
+        opacity: 0.7 !important;
+        margin-left: 2px !important;
+    }
+    .nav-item:hover .caret {
+        transform: rotate(180deg) !important;
+    }
+
+    /* Glassmorphic Dropdown Menu */
+    .nav-dropdown {
+        position: absolute !important;
+        top: calc(100% + 6px) !important;
+        left: 0 !important;
+        min-width: 210px !important;
+        background: rgba(15, 23, 42, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        padding: 6px !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transform: translateY(8px) !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 1001 !important;
+    }
+    .nav-dropdown.right-align {
+        left: auto !important;
+        right: 0 !important;
+    }
+    .nav-item:hover .nav-dropdown {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+    }
+    .dropdown-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        color: #cbd5e1 !important;
+        text-decoration: none !important;
+        padding: 9px 12px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        transition: all 0.15s ease !important;
+        white-space: nowrap !important;
+    }
+    .dropdown-item:hover {
+        color: #ffffff !important;
+        background: rgba(59, 130, 246, 0.18) !important;
+        transform: translateX(2px) !important;
+    }
+    .dropdown-item.danger-item:hover {
+        background: rgba(239, 68, 68, 0.2) !important;
+        color: #fca5a5 !important;
+    }
+    .dropdown-item .item-icon {
+        font-size: 14px !important;
+        width: 18px !important;
+        text-align: center !important;
+        display: inline-block !important;
+    }
+
+    /* Right User Profile Dropdown */
+    .nav-user {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-shrink: 0 !important;
+    }
+    .user-pill {
+        display: flex !important;
+        align-items: center !important;
+        gap: 9px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 4px 12px 4px 4px !important;
+        border-radius: 30px !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .user-pill:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+    }
+    .avatar {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+    .user-name {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #e2e8f0 !important;
+        max-width: 110px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+</style>
+
+<nav class="navbar">
+    <a href="/dashboard" class="nav-brand">
+        <div class="nav-icon">🛡️</div>
+        <div class="nav-title">SecureBank <span>Portal</span></div>
+    </a>
+
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a href="/secure-transfer" class="nav-link">⚡ Express Transfer</a>
+        </li>
+        <li class="nav-item">
+            <a href="/upload" class="nav-link">📁 Documents</a>
+        </li>
+        <li class="nav-item">
+            <a href="/search" class="nav-link">🔍 Directory</a>
+        </li>
+
+        <!-- Services Dropdown -->
+        <li class="nav-item">
+            <span class="nav-link">💼 Services <span class="caret">▼</span></span>
+            <div class="nav-dropdown">
+                <a href="/fetch" class="dropdown-item"><span class="item-icon">🌐</span> External Account</a>
+                <a href="/fetch-url" class="dropdown-item"><span class="item-icon">🔄</span> Partner Data Sync</a>
+                <a href="/render-template" class="dropdown-item"><span class="item-icon">📄</span> Account Statements</a>
+                <a href="/advanced-import" class="dropdown-item"><span class="item-icon">📦</span> Account Migration</a>
+                <a href="/backup" class="dropdown-item"><span class="item-icon">🗄️</span> Data Archival</a>
+            </div>
+        </li>
+
+        <!-- Security Center -->
+        <li class="nav-item">
+            <a href="/crypto" class="nav-link">🔐 Security Center</a>
+        </li>
+
+        <!-- Admin Dropdown (if admin) -->
+        {% if user and user['role'] == 'admin' %}
+        <li class="nav-item">
+            <span class="nav-link admin-link">⚙️ Admin <span class="caret">▼</span></span>
+            <div class="nav-dropdown">
+                <a href="/admin" class="dropdown-item"><span class="item-icon">⚙️</span> System Administration</a>
+                <a href="/execute" class="dropdown-item"><span class="item-icon">⚡</span> System Diagnostics</a>
+                <a href="/import" class="dropdown-item"><span class="item-icon">⬆️</span> Batch Import</a>
+            </div>
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="nav-user">
+        <div class="nav-item">
+            <div class="user-pill">
+                <div class="avatar">{{ user['username'][0].upper() if user else 'U' }}</div>
+                <span class="user-name">{{ user['username'] if user else 'Account' }}</span>
+                <span class="caret" style="color:#94a3b8;font-size:9px;">▼</span>
+            </div>
+            <div class="nav-dropdown right-align" style="min-width: 170px;">
+                <a href="/profile" class="dropdown-item"><span class="item-icon">👤</span> My Profile</a>
+                <a href="/setup" class="dropdown-item"><span class="item-icon">🔒</span> CTF Session ID</a>
+                <a href="/logout" class="dropdown-item danger-item" style="color:#f87171;"><span class="item-icon">🚪</span> Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
