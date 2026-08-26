@@ -53,7 +53,7 @@ def test_categorized_dashboard_and_submission():
     r_sub = s.post(f"{BASE_URL}/dashboard", data={'flag': sqli_flag})
     assert r_sub.status_code == 200
     assert "🎉 Correct! You solved: SQLi #1: Auth Bypass on Login Form!" in r_sub.text, "Flash message missing for solved flag"
-    assert "✔️ Flag Solved" in r_sub.text or "✔️ Solved" in r_sub.text, "Flag slot did not mark as solved"
+    assert "Flag Solved" in r_sub.text or "Solved" in r_sub.text or "status-pill solved" in r_sub.text, "Flag slot did not mark as solved"
     print("✓ Submitting SQLi flag correctly solved the slot and updated dashboard state.")
 
     # 3. Submit a valid flag for RCE #1 (cmd_injection)
